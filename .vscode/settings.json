@@ -80,7 +80,8 @@
         "CreateFramePool",
         "AddonCompartmentFrame",
         "GetCVarNumberOrDefault",
-        "SetRaidTargetIconTexture"
+        "SetRaidTargetIconTexture",
+        "GetQuestDifficultyColor"
     ],
     "Lua.diagnostics.disable": [
         "assign-type-mismatch"
