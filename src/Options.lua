@@ -527,8 +527,7 @@ end
 
 local optionsFrame
 
-SLASH_RETZERPLATES1 = "/rp"
-SlashCmdList["RETZERPLATES"] = function()
+local function ToggleOptions()
     if not optionsFrame then
         optionsFrame = CreateOptionsFrame()
     end
@@ -537,4 +536,44 @@ SlashCmdList["RETZERPLATES"] = function()
     else
         optionsFrame:Show()
     end
+end
+
+SLASH_RETZERPLATES1 = "/rp"
+SlashCmdList["RETZERPLATES"] = ToggleOptions
+
+----------------------------------------------------------------
+-- Minimap button (LibDBIcon)
+----------------------------------------------------------------
+
+local LDB = LibStub("LibDataBroker-1.1", true)
+local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
+
+if LDB and LDBIcon then
+    local broker = LDB:NewDataObject("RetzerPlates", {
+        type = "data source",
+        icon = "Interface\\AddOns\\RetzerPlates\\icon",
+        text = "RetzerPlates",
+        showInCompartment = true,
+
+        OnClick = function(_, button)
+            if button == "LeftButton" then
+                ToggleOptions()
+            end
+        end,
+
+        OnTooltipShow = function(tooltip)
+            tooltip:AddLine("RetzerPlates")
+            tooltip:AddLine("|cFFCFCFCFClick|r to open settings", 0.7, 0.7, 0.7)
+        end,
+    })
+
+    RP:RegisterHook("ApplyDefaults", function()
+        if not RP.db.minimap then RP.db.minimap = {} end
+    end)
+
+    RP:RegisterEvent("PLAYER_LOGIN", function()
+        if not LDBIcon:IsRegistered("RetzerPlates") then
+            LDBIcon:Register("RetzerPlates", broker, RP.db.minimap)
+        end
+    end)
 end

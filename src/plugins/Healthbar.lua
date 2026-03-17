@@ -130,12 +130,3 @@ RP:RegisterHook("GetHealthColor", function(plate)
         end
     end
 end)
-
-----------------------------------------------------------------
--- Layout anchor
-----------------------------------------------------------------
-
----@param plate RPPlate
-RP:RegisterHook("GetRightAnchor", function(plate)
-    return plate.Health
-end)

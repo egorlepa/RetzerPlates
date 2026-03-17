@@ -4,7 +4,12 @@
 ## Version: 0.1.0
 ## Interface: 120000
 ## SavedVariables: RetzerPlatesDB
-## IconTexture: Interface\Icons\Spell_Shadow_SacrificialShield
+## IconTexture: Interface\AddOns\RetzerPlates\icon256.tga
+
+libs\LibStub.lua
+libs\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0.lua
 
 Core.lua
 Config.lua
@@ -12,13 +17,15 @@ Options.lua
 Utilities.lua
 Hooks.lua
 plugins\Healthbar.lua
+Layout.lua
 plugins\Name.lua
 plugins\CastBar.lua
 plugins\Highlight.lua
 plugins\ThreatColoring.lua
 plugins\Auras.lua
-plugins\CrowdControl.lua
+plugins\RaidMarker.lua
 plugins\QuestIndicator.lua
+plugins\CrowdControl.lua
 plugins\ExecuteIndicator.lua
 plugins\TargetIndicator.lua
 Nameplates.lua

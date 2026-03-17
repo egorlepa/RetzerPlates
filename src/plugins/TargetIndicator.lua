@@ -8,15 +8,13 @@ local RP = ns.RP ---@type RP
 ---@class RPTargetConfig
 ---@field enabled boolean
 ---@field arrowSize number
----@field arrowOffset number
 ---@field arrowColor RPColor
 
 RP:RegisterSchema("target", {
     _meta = { label = "Target" },
-    { key = "enabled",     default = true,                          label = "Enable Target Arrows" },
-    { key = "arrowSize",   default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5 },
-    { key = "arrowOffset", default = 20,                            label = "Arrow Offset",        min = 0,  max = 60,  step = 1 },
-    { key = "arrowColor",  default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
+    { key = "enabled",    default = true,                          label = "Enable Target Arrows" },
+    { key = "arrowSize",  default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5 },
+    { key = "arrowColor", default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
 })
 
 ----------------------------------------------------------------
@@ -42,15 +40,37 @@ end
 RP:WrapHook("ConstructHealth", function(original, plate)
     original(plate)
 
-    local offset = RP.db.target.arrowOffset
     local arrowL = CreateArrow(plate.Health, true)
-    arrowL:SetPoint("RIGHT", plate.Health, "LEFT", -offset, 0)
+    arrowL:SetPoint("RIGHT", plate.Health, "LEFT", 0, 0)
 
     local arrowR = CreateArrow(plate.Health, false)
-    arrowR:SetPoint("LEFT", plate.Health, "RIGHT", offset, 0)
+    arrowR:SetPoint("LEFT", plate.Health, "RIGHT", 0, 0)
 
     plate.Health.targetArrowL = arrowL
     plate.Health.targetArrowR = arrowR
+end)
+
+---@param original function
+---@param plate RPPlate
+---@param lastAnchor Frame
+RP:WrapHook("OnLayoutChanged", function(original, plate, lastAnchor)
+    original(plate, lastAnchor)
+    if plate.Health and plate.Health.targetArrowR then
+        plate.Health.targetArrowR:ClearAllPoints()
+        plate.Health.targetArrowR:SetPoint("LEFT", lastAnchor, "RIGHT", 0, 0)
+    end
+end)
+
+---@param original function
+---@param plate RPPlate
+---@param leftmostAnchor Frame
+RP:WrapHook("OnLeftLayoutChanged", function(original, plate, leftmostAnchor)
+    original(plate, leftmostAnchor)
+    if plate.Health and plate.Health.targetArrowL then
+        local xOffset = (leftmostAnchor ~= plate.Health) and leftmostAnchor:GetWidth() or 0
+        plate.Health.targetArrowL:ClearAllPoints()
+        plate.Health.targetArrowL:SetPoint("RIGHT", plate.Health, "LEFT", -xOffset, 0)
+    end
 end)
 
 local function ShowArrows(plate, show)
@@ -65,6 +85,15 @@ local function ShowArrows(plate, show)
         plate.Health.targetArrowR:Hide()
     end
 end
+
+---@param original function
+---@param plate RPPlate
+RP:WrapHook("UpdateLayout", function(original, plate)
+    original(plate)
+    if plate == currentTarget then
+        ShowArrows(plate, true) -- ShowArrows internally checks IsPassive
+    end
+end)
 
 local function RefreshTarget()
     local NP = RP:GetModule("Nameplates")

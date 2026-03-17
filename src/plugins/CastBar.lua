@@ -96,12 +96,14 @@ RP:RegisterHook("ConstructCastBar", function(plate)
         end)
     end
 
-    -- Toggle name visibility when castbar shows/hides
+    -- Toggle name visibility and left anchor when castbar shows/hides
     bar:SetScript("OnShow", function()
         if plate.Name then plate.Name:Hide() end
+        RP:SetLeftAnchor(plate, iconFrame)
     end)
     bar:SetScript("OnHide", function()
         if plate.Name then plate.Name:Show() end
+        RP:ClearLeftAnchor(plate)
     end)
 end)
 

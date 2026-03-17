@@ -78,6 +78,8 @@ end
 -- Visual: quest icon + progress text on health bar
 ----------------------------------------------------------------
 
+RP:RegisterRightSlot("quest")
+
 ---@param original function
 ---@param plate RPPlate
 RP:WrapHook("ConstructHealth", function(original, plate)
@@ -88,7 +90,6 @@ RP:WrapHook("ConstructHealth", function(original, plate)
 
     local iconFrame = CreateFrame("Frame", nil, plate.Health, "BackdropTemplate")
     iconFrame:SetSize(db.iconSize, db.iconSize)
-    iconFrame:SetPoint("LEFT", RP:Call("GetRightAnchor", plate), "RIGHT", 2, 0)
     iconFrame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -114,6 +115,7 @@ RP:WrapHook("ConstructHealth", function(original, plate)
 
     plate.Health.questIcon = iconFrame
     plate.Health.questProgress = progressText
+    RP:SetSlotFrame(plate, "quest", iconFrame)
 end)
 
 ----------------------------------------------------------------
@@ -146,11 +148,7 @@ RP:WrapHook("UpdatePlate", function(original, plate)
     if not db.enabled then return end
 
     if plate.isQuest then
-        local anchor = RP.IsPassive(plate) and plate.Name or RP:Call("GetRightAnchor", plate)
-        plate.Health.questIcon:ClearAllPoints()
-        plate.Health.questIcon:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
-
-        plate.Health.questIcon:Show()
+        RP:SetSlotActive(plate, "quest", true)
         if plate.questProgress then
             plate.Health.questProgress:SetText(plate.questProgress)
             plate.Health.questProgress:Show()
@@ -158,7 +156,7 @@ RP:WrapHook("UpdatePlate", function(original, plate)
             plate.Health.questProgress:Hide()
         end
     else
-        plate.Health.questIcon:Hide()
+        RP:SetSlotActive(plate, "quest", false)
         plate.Health.questProgress:Hide()
     end
 end)

@@ -13,7 +13,6 @@ local RP = ns.RP ---@type RP
 ---@field enabled boolean
 ---@field debug boolean
 ---@field iconSize number
----@field spacing number
 ---@field maxIcons number
 ---@field durationFontSize number
 ---@field stackFontSize number
@@ -23,7 +22,6 @@ RP:RegisterSchema("crowdControl", {
     { key = "enabled",          default = true,  label = "Enable CC Icons" },
     { key = "debug",            default = false, label = "Debug CC Icons" },
     { key = "iconSize",         default = 40,    label = "Icon Size",          min = 14, max = 80, step = 1 },
-    { key = "spacing",          default = 2,     label = "Spacing",            min = 0,  max = 10, step = 1 },
     { key = "maxIcons",         default = 3,     label = "Max Icons",          min = 1,  max = 10, step = 1 },
     { key = "durationFontSize", default = 22,    label = "Duration Font Size", min = 8,  max = 30, step = 1 },
     { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1 },
@@ -37,6 +35,8 @@ RP:RegisterSchema("crowdControl", {
 -- Construction: CC container to the right of health bar
 ----------------------------------------------------------------
 
+RP:RegisterRightSlot("cc")
+
 ---@param original function
 ---@param plate RPPlate
 RP:WrapHook("ConstructHealth", function(original, plate)
@@ -46,14 +46,15 @@ RP:WrapHook("ConstructHealth", function(original, plate)
     if not db.enabled then return end
 
     local container = CreateFrame("Frame", nil, plate.Health)
-    container:SetPoint("LEFT", plate.Health, "RIGHT", db.spacing, 0)
-    container:SetSize(db.maxIcons * (db.iconSize + db.spacing), db.iconSize)
+    container:SetSize(db.maxIcons * (db.iconSize + 2), db.iconSize)
     container:EnableMouse(false)
+    container:Hide()
 
     container.icons = {}
     container.db = db
 
     plate.CCContainer = container
+    RP:SetSlotFrame(plate, "cc", container)
 end)
 
 ----------------------------------------------------------------
@@ -142,7 +143,7 @@ local function UpdateCC(plate)
 
         iconFrame:ClearAllPoints()
         iconFrame:SetPoint("TOPLEFT", container, "TOPLEFT",
-            (shown - 1) * (db.iconSize + db.spacing), 0)
+            (shown - 1) * (db.iconSize + 2), 0)
 
         if aura.icon then
             iconFrame.Icon:SetTexture(aura.icon)
@@ -179,28 +180,15 @@ local function UpdateCC(plate)
         container.icons[i]:Hide()
     end
 
-    -- Track active state and resize container
-    container.active = shown > 0
-    container:ClearAllPoints()
-    if container.active then
-        container:SetPoint("LEFT", plate.Health, "RIGHT", db.spacing, 0)
-        container:SetWidth(shown * db.iconSize + (shown - 1) * db.spacing)
+    -- Resize and toggle slot
+    if shown > 0 then
+        container:SetWidth(shown * db.iconSize + (shown - 1) * 2)
+        RP:SetSlotActive(plate, "cc", true)
     else
-        container:SetPoint("LEFT", plate.Health, "RIGHT", 0, 0)
-        container:SetWidth(0.001)
+        RP:SetSlotActive(plate, "cc", false)
     end
 
 end
-
-----------------------------------------------------------------
--- Hook into plate lifecycle
-----------------------------------------------------------------
-
----@param original function
----@param plate RPPlate
-RP:WrapHook("GetRightAnchor", function(original, plate)
-    return plate.CCContainer or original(plate)
-end)
 
 ---@param original function
 ---@param plate RPPlate
@@ -230,6 +218,7 @@ RP:WrapHook("OnPlateRemoved", function(original, plate)
         for _, icon in ipairs(plate.CCContainer.icons) do
             icon:Hide()
         end
+        RP:SetSlotActive(plate, "cc", false)
     end
     original(plate)
 end)

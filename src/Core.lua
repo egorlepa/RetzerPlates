@@ -28,6 +28,8 @@ local ADDON_NAME, ns = ...
 ---@field execute RPExecuteConfig
 ---@field target RPTargetConfig
 ---@field quest RPQuestConfig
+---@field raidMarker RPRaidMarkerConfig
+---@field minimap table
 
 ---@class RPModule
 ---@field name string
@@ -43,6 +45,14 @@ local ADDON_NAME, ns = ...
 ---@field IsPassive fun(plate: RPPlate): boolean
 ---@field CreateIconFrame fun(parent: Frame, db: table): RPIconFrame
 ---@field RegisterSchema fun(self: RP, key: string, section: RPSchemaSection)
+---@field RegisterRightSlot fun(self: RP, name: string)
+---@field SetSlotFrame fun(self: RP, plate: RPPlate, name: string, frame: Frame)
+---@field SetSlotActive fun(self: RP, plate: RPPlate, name: string, active: boolean)
+---@field GetLastSlot fun(self: RP, plate: RPPlate): Frame
+---@field LayoutRightSlots fun(self: RP, plate: RPPlate)
+---@field SetLeftAnchor fun(self: RP, plate: RPPlate, frame: Frame)
+---@field ClearLeftAnchor fun(self: RP, plate: RPPlate)
+---@field GetLeftAnchor fun(self: RP, plate: RPPlate): Frame
 local RP = {}
 ns.RP = RP
 _G.RetzerPlates = RP
