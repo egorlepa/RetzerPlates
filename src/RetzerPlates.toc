@@ -1,0 +1,24 @@
+## Title: RetzerPlates
+## Notes: Nameplate addon
+## Author: Retzer
+## Version: 0.1.0
+## Interface: 120000
+## SavedVariables: RetzerPlatesDB
+## IconTexture: Interface\Icons\Spell_Shadow_SacrificialShield
+
+Core.lua
+Config.lua
+Options.lua
+Utilities.lua
+Hooks.lua
+plugins\Healthbar.lua
+plugins\Name.lua
+plugins\CastBar.lua
+plugins\Highlight.lua
+plugins\ThreatColoring.lua
+plugins\Auras.lua
+plugins\CrowdControl.lua
+plugins\QuestIndicator.lua
+plugins\ExecuteIndicator.lua
+plugins\TargetIndicator.lua
+Nameplates.lua

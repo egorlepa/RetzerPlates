@@ -1,0 +1,141 @@
+local _, ns = ...
+local RP = ns.RP ---@type RP
+
+---@class RPPlate
+---@field Health RPHealthBar
+
+---@class RPHealthBar : StatusBar
+---@field bg Texture
+---@field border Frame
+---@field highlight Texture
+
+---@class RPHealthbarConfig
+---@field width number
+---@field height number
+---@field colorByClass boolean
+---@field colorByReaction boolean
+---@field colorFriendly RPColor
+---@field colorNeutral RPColor
+---@field colorHostile RPColor
+---@field colorTapped RPColor
+
+RP:RegisterSchema("healthbar", {
+    _meta = { label = "Health Bar" },
+    { key = "width",           default = 200,                              label = "Width",            min = 80, max = 400, step = 5 },
+    { key = "height",          default = 20,                               label = "Height",           min = 4,  max = 60,  step = 1 },
+    { key = "colorByClass",    default = true,                             label = "Color by Class" },
+    { key = "colorByReaction", default = true,                             label = "Color by Reaction" },
+    { key = "colorFriendly",   default = { r = 0.29, g = 0.69, b = 0.30 }, label = "Friendly Color" },
+    { key = "colorNeutral",    default = { r = 0.85, g = 0.77, b = 0.36 }, label = "Neutral Color" },
+    { key = "colorHostile",    default = { r = 0.78, g = 0.25, b = 0.25 }, label = "Hostile Color" },
+    { key = "colorTapped",     default = { r = 0.90, g = 0.90, b = 0.90 }, label = "Tapped Color" },
+})
+
+----------------------------------------------------------------
+-- Construction
+----------------------------------------------------------------
+
+---@param plate RPPlate
+RP:RegisterHook("ConstructHealth", function(plate)
+    local db = RP.db.healthbar
+
+    local bar = CreateFrame("StatusBar", nil, plate)
+    bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    bar:SetMinMaxValues(0, 1)
+    bar:SetSize(db.width, db.height)
+    bar:SetPoint("CENTER", plate, "CENTER", 0, RP.db.general.yOffset or 0)
+    bar:EnableMouse(false)
+
+    local bg = bar:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0, 0, 0, 0.7)
+
+    local border = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+    border:SetAllPoints(bar)
+    border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+    border:SetBackdropBorderColor(0, 0, 0, 1)
+    border:EnableMouse(false)
+
+    local highlight = bar:CreateTexture(nil, "OVERLAY")
+    highlight:SetAllPoints()
+    highlight:SetColorTexture(1, 1, 1, 0.3)
+    highlight:Hide()
+
+    plate.Health = bar
+    plate.Health.bg = bg
+    plate.Health.border = border
+    plate.Health.highlight = highlight
+end)
+
+----------------------------------------------------------------
+-- Updates
+----------------------------------------------------------------
+
+---@param plate RPPlate
+RP:RegisterHook("UpdateHealth", function(plate)
+    local unit = plate.unit
+    if not unit then return end
+
+    -- UnitHealth/UnitHealthMax return secret values — pass directly to C API
+    plate.Health:SetMinMaxValues(0, UnitHealthMax(unit))
+    plate.Health:SetValue(UnitHealth(unit))
+end)
+
+---@param plate RPPlate
+RP:RegisterHook("UpdateHealthColor", function(plate)
+    if RP.IsPassive(plate) then
+        plate.Health:SetStatusBarColor(0, 0, 0, 0)
+        return
+    end
+    local r, g, b = RP:Call("GetHealthColor", plate)
+    if r then
+        plate.Health:SetStatusBarColor(r, g, b, 1)
+    end
+end)
+
+---@param plate RPPlate
+RP:RegisterHook("GetHealthColor", function(plate)
+    local unit = plate.unit
+    if not unit then return end
+
+    local db = RP.db.healthbar
+
+    -- Tapped units (tagged by another player)
+    if UnitIsTapDenied(unit) then
+        local c = db.colorTapped
+        return c.r, c.g, c.b
+    end
+
+    if db.colorByClass and UnitIsPlayer(unit) then
+        local _, class = UnitClass(unit)
+        local color = RAID_CLASS_COLORS[class]
+        if color then
+            return color.r, color.g, color.b
+        end
+    end
+
+    if db.colorByReaction then
+        local reaction = UnitReaction("player", unit)
+        if reaction then
+            if reaction >= 5 then
+                local c = db.colorFriendly
+                return c.r, c.g, c.b
+            elseif reaction == 4 then
+                local c = db.colorNeutral
+                return c.r, c.g, c.b
+            else
+                local c = db.colorHostile
+                return c.r, c.g, c.b
+            end
+        end
+    end
+end)
+
+----------------------------------------------------------------
+-- Layout anchor
+----------------------------------------------------------------
+
+---@param plate RPPlate
+RP:RegisterHook("GetRightAnchor", function(plate)
+    return plate.Health
+end)
