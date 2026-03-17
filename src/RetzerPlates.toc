@@ -19,6 +19,7 @@ Hooks.lua
 plugins\Healthbar.lua
 Layout.lua
 plugins\Name.lua
+plugins\Title.lua
 plugins\CastBar.lua
 plugins\Highlight.lua
 plugins\ThreatColoring.lua
