@@ -191,6 +191,20 @@ RP:WrapHook("UpdatePlate", function(original, plate)
 end)
 
 ----------------------------------------------------------------
+-- Re-scan all visible plates when quest log changes
+----------------------------------------------------------------
+
+RP:RegisterEvent("QUEST_LOG_UPDATE", function()
+    local NP = RP:GetModule("Nameplates")
+    if not NP then return end
+    for _, plate in pairs(NP.plates) do
+        if plate.unit then
+            RP:Call("UpdatePlate", plate)
+        end
+    end
+end)
+
+----------------------------------------------------------------
 -- Clear quest state when plate is recycled
 ----------------------------------------------------------------
 
