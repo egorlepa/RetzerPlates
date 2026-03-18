@@ -81,6 +81,13 @@ function NP:Initialize()
         RP:Call("UpdateHealthColor", plate)
     end)
 
+    -- Name updates (UnitName returns "Unknown" until server sends the name)
+    RP:RegisterEvent("UNIT_NAME_UPDATE", function(_, unitToken)
+        local plate = GetPlateByUnit(unitToken)
+        if not plate then return end
+        RP:Call("UpdateName", plate)
+    end)
+
     -- Faction/reaction changes (e.g. neutral NPC becomes friendly or passive becomes hostile)
     local function OnFactionChanged(_, unitToken)
         local plate = GetPlateByUnit(unitToken)
