@@ -11,6 +11,8 @@ local RP = ns.RP ---@type RP
 ---@field enabled boolean
 ---@field hitboxWidth number
 ---@field hitboxHeight number
+---@field friendlyHitboxWidth number
+---@field friendlyHitboxHeight number
 ---@field yOffset number
 ---@field debug boolean
 ---@field alpha number
@@ -43,11 +45,15 @@ local RP = ns.RP ---@type RP
 RP.schema = {
     general = {
         _meta = { label = "General", order = 1 },
-        { key = "enabled",           default = true,  label = "Enable RetzerPlates", reload = true },
-        { key = "hitboxWidth",       default = 280,   label = "Hitbox Width",        min = 100,    max = 400, step = 10 },
-        { key = "hitboxHeight",      default = 90,    label = "Hitbox Height",       min = 30,     max = 200, step = 5 },
-        { key = "yOffset",           default = 8,     label = "Y Offset",            min = -50,    max = 50,  step = 1 },
-        { key = "debug",             default = false, label = "Debug Hitbox" },
+        { key = "enabled",              default = true,  label = "Enable RetzerPlates",  reload = true },
+        { key = "yOffset",              default = 8,     label = "Y Offset",             min = -50, max = 50,  step = 1 },
+        { header = "Enemy Hitbox" },
+        { key = "hitboxWidth",          default = 280,   label = "Width",                min = 100, max = 400, step = 10 },
+        { key = "hitboxHeight",         default = 90,    label = "Height",               min = 30,  max = 200, step = 5 },
+        { header = "Friendly / Passive Hitbox (NYI — Midnight API limitation)" },
+        { key = "friendlyHitboxWidth",  default = 160,   label = "Width",                min = 50,  max = 400, step = 10 },
+        { key = "friendlyHitboxHeight", default = 55,    label = "Height",               min = 20,  max = 200, step = 5 },
+        { key = "debug",                default = false, label = "Debug Hitboxes" },
         { header = "Alpha" },
         { key = "alpha",             default = 0.75,  label = "Normal Alpha",        min = 0.1,    max = 1.0, step = 0.05 },
         { key = "selectedAlpha",     default = 1.0,   label = "Selected Alpha",      min = 0.1,    max = 1.0, step = 0.05 },

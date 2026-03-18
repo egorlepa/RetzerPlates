@@ -105,9 +105,11 @@ local clickSpaceHooked = false
 
 RP:RegisterHook("SetClickSpace", function()
     local db = RP.db.general
+    -- Global frame size is driven by the enemy hitbox (the larger of the two).
     C_NamePlate.SetNamePlateSize(db.hitboxWidth, db.hitboxHeight)
-    -- Negative insets expand the hit test area to fill the entire frame
-    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
+    -- In Midnight, SetNamePlateHitTestInsets is effectively binary: any negative value
+    -- fills the outer frame, positive kills clicks entirely. Per-type sizing is not supported.
+    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy,    -10000, -10000, -10000, -10000)
     C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
 
     -- Prevent other addons from overriding our plate size
@@ -168,10 +170,13 @@ end)
 ---@class BlizzPlate : Frame
 ---@field UnitFrame Frame?
 
+---@class RPHitboxDebug : Frame, BackdropTemplate
+
 ---@class RPPlate : Frame
 ---@field unit string?
 ---@field unitGUID string?
 ---@field frameType RPFrameType?
+---@field _hitboxDebug RPHitboxDebug?
 
 ---@param parent BlizzPlate
 RP:RegisterHook("ConstructPlate", function(parent)
@@ -184,19 +189,16 @@ RP:RegisterHook("ConstructPlate", function(parent)
     RP:Call("ConstructCastBar", plate)
     RP:Call("ConstructHighlight", plate)
 
-    -- Hitbox debug overlay
-    if RP.db.general.debug then
-        local dbg = CreateFrame("Frame", nil, plate, "BackdropTemplate")
-        dbg:SetSize(RP.db.general.hitboxWidth, RP.db.general.hitboxHeight)
-        dbg:SetPoint("CENTER", parent, "CENTER", 0, 0)
-        dbg:SetBackdrop({
-            bgFile = "Interface\\BUTTONS\\WHITE8X8",
-            edgeFile = "Interface\\BUTTONS\\WHITE8X8",
-            edgeSize = 1,
-        })
-        dbg:SetBackdropColor(1, 0.85, 0.2, 0.15)
-        dbg:SetBackdropBorderColor(1, 0.85, 0.2, 0.8)
-    end
+    -- Hitbox debug overlay (always constructed, shown/sized in UpdateLayout)
+    local dbg = CreateFrame("Frame", nil, plate, "BackdropTemplate") --[[@as RPHitboxDebug]]
+    dbg:SetPoint("CENTER", parent, "CENTER", 0, 0)
+    dbg:SetBackdrop({
+        bgFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeSize = 1,
+    })
+    dbg:Hide()
+    plate._hitboxDebug = dbg
 
     return plate
 end)
@@ -247,15 +249,30 @@ RP:RegisterHook("UpdateLayout", function(plate)
         plate.Health.bg:Show()
         plate.Health.border:Show()
     end
+
+    local dbg = plate._hitboxDebug
+    if not dbg then return end
+    local db = RP.db.general
+    if db.debug then
+        if RP.IsFriendly(plate.frameType) or RP.IsPassive(plate) then
+            dbg:SetSize(db.friendlyHitboxWidth, db.friendlyHitboxHeight)
+            dbg:SetBackdropColor(0.2, 0.6, 1, 0.15)
+            dbg:SetBackdropBorderColor(0.2, 0.6, 1, 0.8)
+        else
+            dbg:SetSize(db.hitboxWidth, db.hitboxHeight)
+            dbg:SetBackdropColor(1, 0.85, 0.2, 0.15)
+            dbg:SetBackdropBorderColor(1, 0.85, 0.2, 0.8)
+        end
+        dbg:Show()
+    else
+        dbg:Hide()
+    end
 end)
 
 ----------------------------------------------------------------
 -- Lifecycle notifications (default no-ops)
 ----------------------------------------------------------------
 
----@param plate RPPlate
-RP:RegisterHook("OnPlateCreated", function(plate) end)
----@param plate RPPlate
-RP:RegisterHook("OnPlateAdded", function(plate) end)
----@param plate RPPlate
-RP:RegisterHook("OnPlateRemoved", function(plate) end)
+RP:RegisterHook("OnPlateCreated", function() end)
+RP:RegisterHook("OnPlateAdded", function() end)
+RP:RegisterHook("OnPlateRemoved", function() end)
