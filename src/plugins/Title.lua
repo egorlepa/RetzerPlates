@@ -47,8 +47,9 @@ local function GetTitleText(unit, db)
     local ok, text = pcall(function()
         local t = line2.leftText
         if not t or t == "" then return nil end
-        -- Skip level lines (e.g. "Level 90", "Level 90 (Elite)")
+        -- Skip level lines (e.g. "Level 90", "Level 90 (Elite)", or bare "80")
         if t:match("^Level ") then return nil end
+        if t:match("^%d+$") then return nil end
         return t
     end)
 

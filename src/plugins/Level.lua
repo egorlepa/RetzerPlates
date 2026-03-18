@@ -96,11 +96,10 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     plate.Level:ClearAllPoints()
 
     if RP.IsPassive(plate) then
-        -- Below the centered name
-        plate.Level:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
-        plate.Level:SetPoint("TOP", plate.Name or plate.Health, "BOTTOM", 0, -1)
-    else
-        plate.Level:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
-        plate.Level:SetPoint("BOTTOMRIGHT", plate.Health, "TOPRIGHT", 0, 2)
+        plate.Level:Hide()
+        return
     end
+
+    plate.Level:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    plate.Level:SetPoint("BOTTOMRIGHT", plate.Health, "TOPRIGHT", 0, 2)
 end)
