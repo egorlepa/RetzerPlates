@@ -29,6 +29,7 @@ local ADDON_NAME, ns = ...
 ---@field target RPTargetConfig
 ---@field quest RPQuestConfig
 ---@field raidMarker RPRaidMarkerConfig
+---@field classification RPClassificationConfig
 ---@field minimap table
 
 ---@class RPModule

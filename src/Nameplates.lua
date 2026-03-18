@@ -15,6 +15,7 @@ local function EnsurePlate(frame)
 end
 
 local function InitPlate(frame, unitToken)
+    if UnitNameplateShowsWidgetsOnly(unitToken) then return end
     RP:Call("SuppressBlizzardPlate", frame)
     local plate = NP.plates[frame]
     if not plate then return end

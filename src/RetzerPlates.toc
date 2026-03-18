@@ -28,6 +28,7 @@ plugins\ThreatColoring.lua
 plugins\Auras.lua
 plugins\RaidMarker.lua
 plugins\Level.lua
+plugins\ClassificationIndicator.lua
 plugins\QuestIndicator.lua
 plugins\CrowdControl.lua
 plugins\TargetIndicator.lua
