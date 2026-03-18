@@ -18,6 +18,7 @@ Utilities.lua
 Hooks.lua
 plugins\Healthbar.lua
 plugins\AbsorbShield.lua
+plugins\ExecuteIndicator.lua
 Layout.lua
 plugins\Name.lua
 plugins\Title.lua
@@ -29,6 +30,5 @@ plugins\RaidMarker.lua
 plugins\Level.lua
 plugins\QuestIndicator.lua
 plugins\CrowdControl.lua
-plugins\ExecuteIndicator.lua
 plugins\TargetIndicator.lua
 Nameplates.lua
