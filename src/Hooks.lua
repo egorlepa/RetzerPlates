@@ -105,10 +105,8 @@ local clickSpaceHooked = false
 
 RP:RegisterHook("SetClickSpace", function()
     local db = RP.db.general
-    -- Global frame size is driven by the enemy hitbox (the larger of the two).
     C_NamePlate.SetNamePlateSize(db.hitboxWidth, db.hitboxHeight)
-    -- In Midnight, SetNamePlateHitTestInsets is effectively binary: any negative value
-    -- fills the outer frame, positive kills clicks entirely. Per-type sizing is not supported.
+    -- Negative insets expand the hit test area to fill the entire frame
     C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy,    -10000, -10000, -10000, -10000)
     C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
 
@@ -254,15 +252,9 @@ RP:RegisterHook("UpdateLayout", function(plate)
     if not dbg then return end
     local db = RP.db.general
     if db.debug then
-        if RP.IsFriendly(plate.frameType) or RP.IsPassive(plate) then
-            dbg:SetSize(db.friendlyHitboxWidth, db.friendlyHitboxHeight)
-            dbg:SetBackdropColor(0.2, 0.6, 1, 0.15)
-            dbg:SetBackdropBorderColor(0.2, 0.6, 1, 0.8)
-        else
-            dbg:SetSize(db.hitboxWidth, db.hitboxHeight)
-            dbg:SetBackdropColor(1, 0.85, 0.2, 0.15)
-            dbg:SetBackdropBorderColor(1, 0.85, 0.2, 0.8)
-        end
+        dbg:SetSize(db.hitboxWidth, db.hitboxHeight)
+        dbg:SetBackdropColor(1, 0.85, 0.2, 0.15)
+        dbg:SetBackdropBorderColor(1, 0.85, 0.2, 0.8)
         dbg:Show()
     else
         dbg:Hide()
