@@ -40,7 +40,10 @@ RP:RegisterHook("ConstructHealth", function(plate)
     local db = RP.db.healthbar
 
     local bar = CreateFrame("StatusBar", nil, plate)
-    bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    local barTex = bar:CreateTexture(nil, "ARTWORK")
+    barTex:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bar:SetStatusBarTexture(barTex)
+    bar.barTexture = barTex
     bar:SetMinMaxValues(0, 1)
     bar:SetSize(db.width, db.height)
     bar:SetPoint("CENTER", plate, "CENTER", 0, RP.db.general.yOffset or 0)

@@ -17,6 +17,7 @@ Options.lua
 Utilities.lua
 Hooks.lua
 plugins\Healthbar.lua
+plugins\AbsorbShield.lua
 Layout.lua
 plugins\Name.lua
 plugins\Title.lua

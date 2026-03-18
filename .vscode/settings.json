@@ -81,7 +81,25 @@
         "AddonCompartmentFrame",
         "GetCVarNumberOrDefault",
         "SetRaidTargetIconTexture",
-        "GetQuestDifficultyColor"
+        "GetQuestDifficultyColor",
+        "UIErrorsFrame",
+        "PlayerCastingBarFrame",
+        "SetCVarToDefault",
+        "CompactUnitFrame_UnregisterEvents",
+        "MAX_CLASSES",
+        "GetRelativeDifficultyColor",
+        "GetUnitName",
+        "TextureLoadingGroupMixin",
+        "GameMenuFrame",
+        "DefaultCompactNamePlateFrameSetUpOptions",
+        "DefaultCompactNamePlateFriendlyFrameOptions",
+        "DefaultCompactNamePlateEnemyFrameOptions",
+        "UNKNOWN",
+        "UNIT_LEVEL_TEMPLATE",
+        "UNITNAME_TITLE_GUARDIAN",
+        "THREAT_TOOLTIP",
+        "UNITNAME_TITLE_PET",
+        "UNITNAME_TITLE_MINION"
     ],
     "Lua.diagnostics.disable": [
         "assign-type-mismatch"
