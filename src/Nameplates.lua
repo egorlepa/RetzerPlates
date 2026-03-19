@@ -105,9 +105,7 @@ function NP:Initialize()
     local function OnFactionChanged(_, unitToken)
         local plate = GetPlateByUnit(unitToken)
         if not plate then return end
-        local newType = RP:Call("GetFrameType", unitToken)
-        if newType == plate.frameType then return end
-        plate.frameType = newType
+        plate.frameType = RP:Call("GetFrameType", unitToken)
         RP:Call("UpdatePlate", plate)
     end
     RP:RegisterEvent("UNIT_FACTION", OnFactionChanged)
