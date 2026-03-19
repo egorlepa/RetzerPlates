@@ -167,6 +167,7 @@ end)
 
 ---@class BlizzPlate : Frame
 ---@field UnitFrame Frame?
+---@field _rpSuppressed boolean?
 
 ---@class RPHitboxDebug : Frame, BackdropTemplate
 
@@ -207,22 +208,25 @@ end)
 local hookedPlates = {}
 ---@param parent BlizzPlate
 RP:RegisterHook("SuppressBlizzardPlate", function(parent)
-    if hookedPlates[parent] then return end
+    parent._rpSuppressed = true
+
     if not parent.UnitFrame then return end
     if parent.UnitFrame:IsForbidden() then return end
 
     parent.UnitFrame:UnregisterAllEvents()
     parent.UnitFrame:SetAlpha(0)
 
-    local locked = false
-    hooksecurefunc(parent.UnitFrame, "SetAlpha", function(self)
-        if locked or self:IsForbidden() then return end
-        locked = true
-        self:SetAlpha(0)
-        locked = false
-    end)
-
-    hookedPlates[parent] = true
+    if not hookedPlates[parent] then
+        local locked = false
+        hooksecurefunc(parent.UnitFrame, "SetAlpha", function(self)
+            if locked or self:IsForbidden() then return end
+            if not parent._rpSuppressed then return end
+            locked = true
+            self:SetAlpha(0)
+            locked = false
+        end)
+        hookedPlates[parent] = true
+    end
 end)
 
 ----------------------------------------------------------------

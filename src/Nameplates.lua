@@ -15,7 +15,16 @@ local function EnsurePlate(frame)
 end
 
 local function InitPlate(frame, unitToken)
-    if UnitNameplateShowsWidgetsOnly(unitToken) then return end
+    if UnitNameplateShowsWidgetsOnly(unitToken) then
+        -- Restore Blizzard UnitFrame if this frame was previously suppressed
+        if frame._rpSuppressed then
+            frame._rpSuppressed = false
+            if frame.UnitFrame and not frame.UnitFrame:IsForbidden() then
+                frame.UnitFrame:SetAlpha(1)
+            end
+        end
+        return
+    end
     RP:Call("SuppressBlizzardPlate", frame)
     local plate = NP.plates[frame]
     if not plate then return end
