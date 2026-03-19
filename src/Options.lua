@@ -5,7 +5,7 @@ local RP = ns.RP ---@type RP
 -- Constants
 ----------------------------------------------------------------
 
-local FRAME_W, FRAME_H = 600, 500
+local FRAME_W, FRAME_H = 600, 580
 local TAB_W = 140
 local WIDGET_H = 28
 local WIDGET_GAP = 4
@@ -734,6 +734,21 @@ local function CreateOptionsFrame()
     scrollFrame:SetScrollChild(scrollChild)
     scrollChild:SetWidth(FRAME_W - TAB_W - 56)
 
+    -- Tab scroll area (inside tab panel)
+    local tabScroll = CreateFrame("ScrollFrame", nil, tabPanel)
+    tabScroll:SetPoint("TOPLEFT", 0, 0)
+    tabScroll:SetPoint("BOTTOMRIGHT", 0, 0)
+    tabScroll:EnableMouseWheel(true)
+    tabScroll:SetScript("OnMouseWheel", function(self, delta)
+        local cur = self:GetVerticalScroll()
+        local max = self:GetVerticalScrollRange()
+        self:SetVerticalScroll(math.max(0, math.min(max, cur - delta * 26)))
+    end)
+
+    local tabChild = CreateFrame("Frame", nil, tabScroll)
+    tabChild:SetWidth(TAB_W)
+    tabScroll:SetScrollChild(tabChild)
+
     -- Build tabs
     local sections = GetSortedSections()
     local tabButtons = {}
@@ -751,9 +766,9 @@ local function CreateOptionsFrame()
     end
 
     for i, sec in ipairs(sections) do
-        local tab = CreateFrame("Button", nil, tabPanel)
+        local tab = CreateFrame("Button", nil, tabChild)
         tab:SetSize(TAB_W - 4, 24)
-        tab:SetPoint("TOPLEFT", tabPanel, "TOPLEFT", 2, -2 - (i - 1) * 26)
+        tab:SetPoint("TOPLEFT", tabChild, "TOPLEFT", 2, -2 - (i - 1) * 26)
 
         local highlight = tab:CreateTexture(nil, "BACKGROUND")
         highlight:SetAllPoints()
@@ -781,6 +796,8 @@ local function CreateOptionsFrame()
 
         tabButtons[i] = tab
     end
+
+    tabChild:SetHeight(2 + #sections * 26)
 
     -- Select first tab
     SelectTab(1)
