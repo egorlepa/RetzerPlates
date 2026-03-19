@@ -308,6 +308,9 @@ RP:RegisterHook("StopCastBar", function(plate, reason, interruptedBy)
         plate.CastBar._fadeOut = nil
         plate.CastBar._fadeDuration = nil
         plate.CastBar:SetAlpha(1)
+        if not plate._debugCastBar then
+            plate.CastBar:SetScript("OnUpdate", nil)
+        end
         plate.CastBar:Hide()
     end
 end)
