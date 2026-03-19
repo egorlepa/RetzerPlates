@@ -103,7 +103,7 @@ end
 -- Extract flat defaults from schema
 ----------------------------------------------------------------
 
-local function ExtractDefaults(schema)
+function RP.ExtractDefaults(schema)
     local out = {}
     for section, entries in pairs(schema) do
         out[section] = {}
@@ -120,25 +120,3 @@ local function ExtractDefaults(schema)
     end
     return out
 end
-
-----------------------------------------------------------------
--- Merge defaults into saved variables
-----------------------------------------------------------------
-
-local function CopyDefaults(src, dst)
-    for k, v in pairs(src) do
-        if type(v) == "table" then
-            if type(dst[k]) ~= "table" then
-                dst[k] = {}
-            end
-            CopyDefaults(v, dst[k])
-        elseif dst[k] == nil then
-            dst[k] = v
-        end
-    end
-end
-
-RP:RegisterHook("ApplyDefaults", function()
-    RP.defaults = ExtractDefaults(RP.schema)
-    CopyDefaults(RP.defaults, RP.db)
-end)

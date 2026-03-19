@@ -55,6 +55,8 @@ local function RefreshAllPlates()
     end
 end
 
+RP.RefreshAllPlates = RefreshAllPlates
+
 local function ScheduleRefresh()
     if refreshTimer then return end
     refreshTimer = C_Timer.After(0.05, function()
@@ -300,20 +302,285 @@ end
 -- Reset helpers
 ----------------------------------------------------------------
 
-local function DeepCopy(src)
-    if type(src) ~= "table" then return src end
-    local copy = {}
-    for k, v in pairs(src) do
-        copy[k] = DeepCopy(v)
+local function ResetSection(sectionKey)
+    local section = RP.db[sectionKey]
+    if not section then return end
+    for k in pairs(section) do
+        section[k] = nil
     end
-    return copy
+    ScheduleRefresh()
 end
 
-local function ResetSection(sectionKey)
-    local defaults = RP.defaults[sectionKey]
-    if not defaults then return end
-    RP.db[sectionKey] = DeepCopy(defaults)
-    ScheduleRefresh()
+----------------------------------------------------------------
+-- Shared UI helpers
+----------------------------------------------------------------
+
+local BACKDROP_SOLID = {
+    bgFile = "Interface\\Buttons\\WHITE8X8",
+    edgeFile = "Interface\\Buttons\\WHITE8X8",
+    edgeSize = 1,
+}
+
+local function CreateButton(parent, label, width, onClick)
+    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    btn:SetSize(width, 24)
+    btn:SetBackdrop(BACKDROP_SOLID)
+    btn:SetBackdropColor(0.2, 0.2, 0.2, 1)
+    btn:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+
+    local text = btn:CreateFontString(nil, "OVERLAY")
+    text:SetFont(STANDARD_TEXT_FONT, 11, "")
+    text:SetText(label)
+    text:SetPoint("CENTER")
+    btn._text = text
+
+    btn:SetScript("OnEnter", function(self) self:SetBackdropColor(0.3, 0.3, 0.3, 1) end)
+    btn:SetScript("OnLeave", function(self) self:SetBackdropColor(0.2, 0.2, 0.2, 1) end)
+    btn:SetScript("OnClick", onClick)
+    return btn
+end
+
+local function CreateEditBox(parent, width)
+    local box = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
+    box:SetSize(width, 24)
+    box:SetBackdrop(BACKDROP_SOLID)
+    box:SetBackdropColor(0.12, 0.12, 0.12, 1)
+    box:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+    box:SetFont(STANDARD_TEXT_FONT, 12, "")
+    box:SetTextColor(1, 1, 1)
+    box:SetTextInsets(6, 6, 0, 0)
+    box:SetAutoFocus(false)
+    box:SetMaxLetters(40)
+    return box
+end
+
+--- Simple dropdown: a button that opens a menu of choices below it.
+--- onChange(value) is called when a choice is selected.
+local function CreateDropdown(parent, width, choices, current, onChange)
+    local container = CreateFrame("Frame", nil, parent)
+    container:SetSize(width, 24)
+
+    local btn = CreateFrame("Button", nil, container, "BackdropTemplate")
+    btn:SetSize(width, 24)
+    btn:SetPoint("TOPLEFT")
+    btn:SetBackdrop(BACKDROP_SOLID)
+    btn:SetBackdropColor(0.15, 0.15, 0.15, 1)
+    btn:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+
+    local text = btn:CreateFontString(nil, "OVERLAY")
+    text:SetFont(STANDARD_TEXT_FONT, 12, "")
+    text:SetTextColor(1, 1, 1)
+    text:SetText(current or "")
+    text:SetPoint("LEFT", 8, 0)
+    text:SetPoint("RIGHT", -20, 0)
+    text:SetJustifyH("LEFT")
+
+    local arrow = btn:CreateFontString(nil, "OVERLAY")
+    arrow:SetFont(STANDARD_TEXT_FONT, 10, "")
+    arrow:SetTextColor(0.6, 0.6, 0.6)
+    arrow:SetText("v")
+    arrow:SetPoint("RIGHT", -6, 0)
+
+    -- Menu frame (hidden by default)
+    local menu = CreateFrame("Frame", nil, btn, "BackdropTemplate")
+    menu:SetBackdrop(BACKDROP_SOLID)
+    menu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+    menu:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+    menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -1)
+    menu:SetFrameStrata("TOOLTIP")
+    menu:Hide()
+
+    local function Refresh(newChoices, newCurrent)
+        choices = newChoices or choices
+        text:SetText(newCurrent or current or "")
+        current = newCurrent or current
+
+        -- Clear old items
+        for _, child in pairs({ menu:GetChildren() }) do
+            child:Hide()
+            child:SetParent(nil)
+        end
+
+        local itemH = 22
+        menu:SetSize(width, #choices * itemH + 4)
+
+        for i, choice in ipairs(choices) do
+            local item = CreateFrame("Button", nil, menu)
+            item:SetSize(width - 4, itemH)
+            item:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, -2 - (i - 1) * itemH)
+
+            local itemHL = item:CreateTexture(nil, "BACKGROUND")
+            itemHL:SetAllPoints()
+            itemHL:SetColorTexture(0, 0, 0, 0)
+
+            local itemText = item:CreateFontString(nil, "OVERLAY")
+            itemText:SetFont(STANDARD_TEXT_FONT, 12, "")
+            itemText:SetTextColor(0.9, 0.9, 0.9)
+            itemText:SetText(choice)
+            itemText:SetPoint("LEFT", 8, 0)
+
+            item:SetScript("OnEnter", function() itemHL:SetColorTexture(1, 1, 1, 0.1) end)
+            item:SetScript("OnLeave", function() itemHL:SetColorTexture(0, 0, 0, 0) end)
+            item:SetScript("OnClick", function()
+                current = choice
+                text:SetText(choice)
+                menu:Hide()
+                if onChange then onChange(choice) end
+            end)
+        end
+    end
+
+    Refresh(choices, current)
+
+    btn:SetScript("OnClick", function()
+        if menu:IsShown() then
+            menu:Hide()
+        else
+            Refresh(choices, current)
+            menu:Show()
+        end
+    end)
+
+    btn:SetScript("OnEnter", function(self) self:SetBackdropColor(0.2, 0.2, 0.2, 1) end)
+    btn:SetScript("OnLeave", function(self) self:SetBackdropColor(0.15, 0.15, 0.15, 1) end)
+
+    container.Refresh = Refresh
+    container.GetValue = function() return current end
+    return container
+end
+
+----------------------------------------------------------------
+-- Profile management tab
+----------------------------------------------------------------
+
+local function ClearScrollChild(scrollChild)
+    for _, child in pairs({ scrollChild:GetChildren() }) do
+        child:Hide()
+        child:SetParent(nil)
+    end
+    for _, region in pairs({ scrollChild:GetRegions() }) do
+        region:Hide()
+        region:SetParent(nil)
+    end
+end
+
+local function PopulateProfileSection(scrollChild, repopulate)
+    ClearScrollChild(scrollChild)
+
+    local y = -CONTENT_PAD
+    local aceDB = RP.aceDB
+    local profiles = {}
+    aceDB:GetProfiles(profiles)
+    table.sort(profiles, function(a, b)
+        if a == "Default" then return true end
+        if b == "Default" then return false end
+        return a < b
+    end)
+
+    local currentProfile = aceDB:GetCurrentProfile()
+
+    -- Active Profile
+    local h = CreateHeader(scrollChild, "Active Profile", y)
+    y = y - h - WIDGET_GAP
+
+    local profileDropdown = CreateDropdown(scrollChild, 200, profiles, currentProfile, function(choice)
+        if choice ~= aceDB:GetCurrentProfile() then
+            aceDB:SetProfile(choice)
+            -- OnProfileChanged callback handles RP.db re-wire and plate refresh
+            repopulate()
+        end
+    end)
+    profileDropdown:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    y = y - 28 - WIDGET_GAP
+
+    -- New Profile
+    y = y - HEADER_GAP
+    h = CreateHeader(scrollChild, "New Profile", y)
+    y = y - h - WIDGET_GAP
+
+    local nameBox = CreateEditBox(scrollChild, 200)
+    nameBox:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+
+    local createBtn = CreateButton(scrollChild, "Create", 70, function()
+        local name = strtrim(nameBox:GetText())
+        if name == "" then return end
+        -- SetProfile auto-creates if profile doesn't exist
+        aceDB:SetProfile(name)
+        repopulate()
+    end)
+    createBtn:SetPoint("LEFT", nameBox, "RIGHT", 6, 0)
+    nameBox:SetScript("OnEnterPressed", function() createBtn:GetScript("OnClick")(createBtn) end)
+    y = y - 28 - WIDGET_GAP
+
+    -- Copy From
+    y = y - HEADER_GAP
+    h = CreateHeader(scrollChild, "Copy Settings From", y)
+    y = y - h - WIDGET_GAP
+
+    local otherProfiles = {}
+    for _, p in ipairs(profiles) do
+        if p ~= currentProfile then
+            otherProfiles[#otherProfiles + 1] = p
+        end
+    end
+
+    if #otherProfiles > 0 then
+        local copyDropdown = CreateDropdown(scrollChild, 200, otherProfiles, otherProfiles[1])
+        copyDropdown:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+
+        local copyBtn = CreateButton(scrollChild, "Copy", 70, function()
+            local source = copyDropdown.GetValue()
+            if source then
+                aceDB:CopyProfile(source)
+                -- OnProfileCopied callback handles refresh
+                repopulate()
+            end
+        end)
+        copyBtn:SetPoint("LEFT", copyDropdown, "RIGHT", 6, 0)
+    else
+        local noOther = scrollChild:CreateFontString(nil, "OVERLAY")
+        noOther:SetFont(STANDARD_TEXT_FONT, 11, "")
+        noOther:SetTextColor(0.5, 0.5, 0.5)
+        noOther:SetText("No other profiles to copy from")
+        noOther:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    end
+    y = y - 28 - WIDGET_GAP
+
+    -- Actions
+    y = y - HEADER_GAP
+    h = CreateHeader(scrollChild, "Actions", y)
+    y = y - h - WIDGET_GAP
+
+    local resetBtn = CreateButton(scrollChild, "Reset Profile", 110, function()
+        aceDB:ResetProfile()
+        repopulate()
+    end)
+    resetBtn:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+
+    if currentProfile ~= "Default" then
+        local profileToDelete = currentProfile
+        local deleteBtn = CreateButton(scrollChild, "Delete Profile", 110, function()
+            aceDB:SetProfile("Default")
+            aceDB:DeleteProfile(profileToDelete)
+            repopulate()
+        end)
+        deleteBtn:SetPoint("LEFT", resetBtn, "RIGHT", 8, 0)
+    end
+    y = y - 28 - WIDGET_GAP
+
+    -- Character info
+    y = y - HEADER_GAP
+    h = CreateHeader(scrollChild, "Current Character", y)
+    y = y - h - WIDGET_GAP
+
+    local charInfo = scrollChild:CreateFontString(nil, "OVERLAY")
+    charInfo:SetFont(STANDARD_TEXT_FONT, 11, "")
+    charInfo:SetTextColor(0.7, 0.7, 0.7)
+    charInfo:SetText(UnitName("player") .. " - " .. GetRealmName())
+    charInfo:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    y = y - 20
+
+    scrollChild:SetHeight(math.abs(y) + CONTENT_PAD)
 end
 
 ----------------------------------------------------------------
@@ -321,7 +588,9 @@ end
 ----------------------------------------------------------------
 
 local function GetSortedSections()
-    local list = {}
+    local list = {
+        { key = "_profiles", label = "Profiles", order = 0 },
+    }
     for sectionKey, fields in pairs(RP.schema) do
         local meta = fields._meta
         if meta then
@@ -337,15 +606,13 @@ end
 ----------------------------------------------------------------
 
 local function PopulateSection(scrollChild, sectionKey)
-    -- Clear previous children
-    for _, child in pairs({ scrollChild:GetChildren() }) do
-        child:Hide()
-        child:SetParent(nil)
-    end
-    -- Clear fontstrings
-    for _, region in pairs({ scrollChild:GetRegions() }) do
-        region:Hide()
-        region:SetParent(nil)
+    ClearScrollChild(scrollChild)
+
+    if sectionKey == "_profiles" then
+        PopulateProfileSection(scrollChild, function()
+            PopulateSection(scrollChild, "_profiles")
+        end)
+        return
     end
 
     local section = RP.schema[sectionKey]
@@ -528,6 +795,10 @@ end
 local optionsFrame
 
 local function ToggleOptions()
+    if InCombatLockdown() then
+        print("|cffff6600RetzerPlates:|r Cannot open settings in combat")
+        return
+    end
     if not optionsFrame then
         optionsFrame = CreateOptionsFrame()
     end
@@ -540,6 +811,13 @@ end
 
 SLASH_RETZERPLATES1 = "/rp"
 SlashCmdList["RETZERPLATES"] = ToggleOptions
+
+-- Force-close options on combat start
+RP:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+    if optionsFrame and optionsFrame:IsShown() then
+        optionsFrame:Hide()
+    end
+end)
 
 ----------------------------------------------------------------
 -- Minimap button (LibDBIcon)
@@ -567,13 +845,9 @@ if LDB and LDBIcon then
         end,
     })
 
-    RP:RegisterHook("ApplyDefaults", function()
-        if not RP.db.minimap then RP.db.minimap = {} end
-    end)
-
     RP:RegisterEvent("PLAYER_LOGIN", function()
         if not LDBIcon:IsRegistered("RetzerPlates") then
-            LDBIcon:Register("RetzerPlates", broker, RP.db.minimap)
+            LDBIcon:Register("RetzerPlates", broker, RP.aceDB.global.minimap)
         end
     end)
 end

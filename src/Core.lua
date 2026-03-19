@@ -41,6 +41,9 @@ local ADDON_NAME, ns = ...
 ---@field db RPDatabase
 ---@field schema table<string, RPSchemaSection>
 ---@field defaults table<string, table>
+---@field aceDB table
+---@field ExtractDefaults fun(schema: table): table
+---@field RefreshAllPlates fun()?
 ---@field version string
 ---@field IsFriendly fun(frameType: RPFrameType): boolean
 ---@field IsPassive fun(plate: RPPlate): boolean
@@ -162,9 +165,23 @@ local function onAddonLoaded(event, addon)
     if addon ~= ADDON_NAME then return end
     RP:UnregisterEvent("ADDON_LOADED", onAddonLoaded)
 
-    RetzerPlatesDB = RetzerPlatesDB or {}
-    RP.db = RetzerPlatesDB
-    RP:Call("ApplyDefaults")
+    -- Build defaults from schema and initialize AceDB
+    RP.defaults = RP.ExtractDefaults(RP.schema)
+    local aceDB = LibStub("AceDB-3.0"):New("RetzerPlatesDB", {
+        profile = RP.defaults,
+        global = { minimap = {} },
+    })
+    RP.aceDB = aceDB
+    RP.db = aceDB.profile
+
+    -- Re-wire RP.db on profile changes and refresh all plates
+    local function OnProfileChanged()
+        RP.db = RP.aceDB.profile
+        if RP.RefreshAllPlates then RP.RefreshAllPlates() end
+    end
+    aceDB.RegisterCallback(RP, "OnProfileChanged", OnProfileChanged)
+    aceDB.RegisterCallback(RP, "OnProfileReset", OnProfileChanged)
+    aceDB.RegisterCallback(RP, "OnProfileCopied", OnProfileChanged)
 
     for _, mod in pairs(modules) do
         if mod.Initialize then

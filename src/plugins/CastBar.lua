@@ -254,6 +254,8 @@ end)
 ---@param interruptedBy string?
 RP:RegisterHook("StopCastBar", function(plate, reason, interruptedBy)
     if not plate.CastBar then return end
+    local cbConfig = RP.db.castbar
+    if not cbConfig then return end
 
     -- Clear debug state so next UpdateCastBar starts fresh
     plate._debugStart = nil
@@ -267,7 +269,7 @@ RP:RegisterHook("StopCastBar", function(plate, reason, interruptedBy)
     end
     plate.CastBar._durationObject = nil
 
-    local fadeDuration = RP.db.castbar.fadeDuration
+    local fadeDuration = cbConfig.fadeDuration
     local duration
     if reason == "INTERRUPTED" then
         plate.CastBar:SetStatusBarColor(1, 0, 0, 1)
