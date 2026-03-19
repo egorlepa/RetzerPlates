@@ -10,14 +10,16 @@ local RP = ns.RP ---@type RP
 
 ---@class RPClassificationConfig
 ---@field enabled boolean
+---@field hideInInstance boolean
 ---@field debug boolean
 ---@field iconSize number
 
 RP:RegisterSchema("classification", {
     _meta = { label = "Classification" },
-    { key = "enabled",  default = true,  label = "Enable Classification Icons" },
-    { key = "debug",    default = false, label = "Debug Classifications" },
-    { key = "iconSize", default = 20,    label = "Icon Size", min = 8, max = 40, step = 1 },
+    { key = "enabled",        default = true,  label = "Enable Classification Icons" },
+    { key = "hideInInstance", default = true,  label = "Hide in Instances" },
+    { key = "debug",          default = false, label = "Debug Classifications" },
+    { key = "iconSize",       default = 20,    label = "Icon Size", min = 8, max = 40, step = 1 },
 })
 
 ----------------------------------------------------------------
@@ -119,7 +121,9 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     local classification = db.debug
         and plate._debugClassification
         or (unit and UnitClassification(unit))
+    local inInstance = select(2, IsInInstance()) ~= "none"
     local shouldShow = db.enabled
+        and not (db.hideInInstance and inInstance)
         and not RP.IsPassive(plate)
         and classification
         and (db.debug or SHOW_FOR[classification])

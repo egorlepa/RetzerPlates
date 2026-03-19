@@ -22,7 +22,7 @@ local RP = ns.RP ---@type RP
 ---@field stackFriendlies boolean
 
 ---@class RPVisibilityConfig
----@field hideFriendlyInDungeon boolean
+---@field hideFriendlyInInstance boolean
 ---@field showEnemies boolean
 ---@field showEnemyMinions boolean
 ---@field showEnemyGuardians boolean
@@ -44,10 +44,10 @@ RP.schema = {
     general = {
         _meta = { label = "General", order = 1 },
         { key = "enabled",              default = true,  label = "Enable RetzerPlates",  reload = true },
-        { key = "yOffset",              default = 8,     label = "Y Offset",             min = -50, max = 50,  step = 1 },
+        { key = "yOffset",              default = 7,     label = "Y Offset",             min = -50, max = 50,  step = 1 },
         { header = "Hitbox" },
-        { key = "hitboxWidth",  default = 280,   label = "Width",  min = 100, max = 400, step = 10 },
-        { key = "hitboxHeight", default = 90,    label = "Height", min = 30,  max = 200, step = 5 },
+        { key = "hitboxWidth",  default = 250,   label = "Width",  min = 100, max = 400, step = 10 },
+        { key = "hitboxHeight", default = 75,    label = "Height", min = 30,  max = 200, step = 5 },
         { key = "debug",        default = false, label = "Debug Hitboxes" },
         { header = "Alpha" },
         { key = "alpha",             default = 0.75,  label = "Normal Alpha",        min = 0.1,    max = 1.0, step = 0.05 },
@@ -61,7 +61,7 @@ RP.schema = {
     },
     visibility = {
         _meta = { label = "Visibility", order = 2 },
-        { key = "hideFriendlyInDungeon",       default = true,  label = "Hide Friendly in Dungeon" },
+        { key = "hideFriendlyInInstance",      default = true,  label = "Hide Friendly in Instances" },
         { header = "Enemies" },
         { key = "showEnemies",                 default = true,  label = "Show Enemies" },
         { key = "showEnemyMinions",            default = true,  label = "Enemy Minions" },

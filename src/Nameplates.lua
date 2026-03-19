@@ -29,6 +29,18 @@ local function InitPlate(frame, unitToken)
     RP:Call("UpdateCastBar", plate)
     plate:Show()
     RP:Call("OnPlateAdded", plate)
+
+    -- If the name is unknown at this point (unit summoned mid-combat and server
+    -- hasn't sent the name yet), schedule a retry.  UNIT_NAME_UPDATE will also
+    -- fire when the name resolves, but can arrive before the plate is ready.
+    local name = UnitName(unitToken)
+    if not name or (issecretvalue and issecretvalue(name)) then
+        C_Timer.After(0.5, function()
+            if plate.unit == unitToken then
+                RP:Call("UpdateName", plate)
+            end
+        end)
+    end
 end
 
 function NP:Initialize()

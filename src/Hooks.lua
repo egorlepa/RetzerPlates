@@ -7,7 +7,7 @@ local RP = ns.RP ---@type RP
 
 RP:RegisterHook("SetCVars", function()
     local inInstance, instanceType = IsInInstance()
-    local inDungeon = inInstance and (instanceType == "party" or instanceType == "raid")
+    local inDungeon = inInstance and instanceType ~= "none"
     local vis = RP.db.visibility
     local dist = RP.db.distances
     local gen = RP.db.general
@@ -29,8 +29,8 @@ RP:RegisterHook("SetCVars", function()
         nameplateShowAll                      = 1,
         nameplateShowEnemies                  = B(vis.showEnemies),
         nameplateShowSelf                     = 0,
-        nameplateShowFriendlyNPCs             = (inDungeon and vis.hideFriendlyInDungeon) and 0 or B(vis.showFriendlyNPCs),
-        nameplateShowFriendlyPlayers          = (inDungeon and vis.hideFriendlyInDungeon) and 0 or B(vis.showFriendlyPlayers),
+        nameplateShowFriendlyNPCs             = (inDungeon and vis.hideFriendlyInInstance) and 0 or B(vis.showFriendlyNPCs),
+        nameplateShowFriendlyPlayers          = (inDungeon and vis.hideFriendlyInInstance) and 0 or B(vis.showFriendlyPlayers),
         nameplateShowCastBars                 = 0,     -- we render our own
         nameplateShowOffscreen                = 1,
 

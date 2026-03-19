@@ -71,7 +71,7 @@ RP:WrapHook("UpdateName", function(original, plate)
     end
 
     -- Hide max-level units if configured
-    if db.hideMaxLevel and level == GetMaxPlayerLevel() then
+    if db.hideMaxLevel and level >= GetMaxPlayerLevel() then
         plate.Level:Hide()
         return
     end
