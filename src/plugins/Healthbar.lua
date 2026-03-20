@@ -53,12 +53,21 @@ RP:RegisterHook("ConstructHealth", function(plate)
     bg:SetAllPoints()
     bg:SetColorTexture(0, 0, 0, 0.7)
 
-    local border = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-    border:SetSize(db.width, db.height)
-    border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-    border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    border:SetBackdropBorderColor(0, 0, 0, 1)
+    local border = CreateFrame("Frame", nil, bar)
+    border:SetAllPoints(bar)
     border:EnableMouse(false)
+    for _, e in ipairs({
+        {"TOPLEFT", "TOPRIGHT", "SetHeight"},
+        {"BOTTOMLEFT", "BOTTOMRIGHT", "SetHeight"},
+        {"TOPLEFT", "BOTTOMLEFT", "SetWidth"},
+        {"TOPRIGHT", "BOTTOMRIGHT", "SetWidth"},
+    }) do
+        local t = border:CreateTexture(nil, "OVERLAY")
+        t:SetColorTexture(0, 0, 0, 1)
+        t:SetPoint(e[1])
+        t:SetPoint(e[2])
+        t[e[3]](t, 1)
+    end
 
     local highlight = bar:CreateTexture(nil, "OVERLAY")
     highlight:SetAllPoints()

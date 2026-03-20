@@ -58,12 +58,14 @@ RP:RegisterHook("ConstructCastBar", function(plate)
     bg:SetColorTexture(0, 0, 0, 0.7)
 
     local totalHeight = RP.db.healthbar.height + db.height - 1 -- shared border pixel
-    local iconFrame = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+    local iconFrame = CreateFrame("Frame", nil, bar)
     iconFrame:SetSize(totalHeight, totalHeight)
     iconFrame:SetPoint("TOPRIGHT", bar, "TOPLEFT", 0, 0)
-    iconFrame:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    iconFrame:SetBackdropBorderColor(0, 0, 0, 1)
     iconFrame:EnableMouse(false)
+
+    local iconBg = iconFrame:CreateTexture(nil, "BACKGROUND")
+    iconBg:SetAllPoints()
+    iconBg:SetColorTexture(0, 0, 0, 1)
 
     local icon = iconFrame:CreateTexture(nil, "ARTWORK")
     icon:SetPoint("TOPLEFT", iconFrame, "TOPLEFT", 1, -1)
@@ -74,12 +76,21 @@ RP:RegisterHook("ConstructCastBar", function(plate)
     text:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
     text:SetPoint("LEFT", bar, "LEFT", 4, 0)
 
-    local border = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-    border:SetSize(RP.db.healthbar.width, db.height)
-    border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-    border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    border:SetBackdropBorderColor(0, 0, 0, 1)
+    local border = CreateFrame("Frame", nil, bar)
+    border:SetAllPoints(bar)
     border:EnableMouse(false)
+    for _, e in ipairs({
+        {"TOPLEFT", "TOPRIGHT", "SetHeight"},
+        {"BOTTOMLEFT", "BOTTOMRIGHT", "SetHeight"},
+        {"TOPLEFT", "BOTTOMLEFT", "SetWidth"},
+        {"TOPRIGHT", "BOTTOMRIGHT", "SetWidth"},
+    }) do
+        local t = border:CreateTexture(nil, "OVERLAY")
+        t:SetColorTexture(0, 0, 0, 1)
+        t:SetPoint(e[1])
+        t:SetPoint(e[2])
+        t[e[3]](t, 1)
+    end
 
     plate.CastBar = bar
     plate.CastBar.bg = bg
@@ -221,6 +232,11 @@ RP:RegisterHook("UpdateCastBar", function(plate)
     end
 
     RP:Call("UpdateCastBarColor", plate, notInterruptible)
+    -- Clear any stale fade-out OnUpdate from a previous cast, otherwise it fires
+    -- one more time, sees _fadeOut == nil, and hides the bar we just showed.
+    if not plate._debugCastBar then
+        plate.CastBar:SetScript("OnUpdate", nil)
+    end
     plate.CastBar:SetAlpha(1)
     plate.CastBar._fadeOut = nil
     plate.CastBar:Show()
