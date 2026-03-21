@@ -33,6 +33,7 @@ RP:WrapHook("GetHealthColor", function(original, plate)
     if not db.enabled then return original(plate) end
     if not InCombatLockdown() then return original(plate) end
     if not UnitCanAttack("player", unit) then return original(plate) end
+    if UnitPlayerControlled(unit) then return original(plate) end
 
     local threat = UnitThreatSituation("player", unit)
     if not threat then return original(plate) end
