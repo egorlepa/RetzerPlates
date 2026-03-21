@@ -113,7 +113,12 @@ function RP:Call(name, ...)
     if not fn then
         error("RetzerPlates: Unknown hook '" .. name .. "'")
     end
-    return fn(...)
+    local ok, r1, r2, r3 = pcall(fn, ...)
+    if not ok then
+        geterrorhandler()(r1)
+        return
+    end
+    return r1, r2, r3
 end
 
 function RP:SetHook(name, fn)

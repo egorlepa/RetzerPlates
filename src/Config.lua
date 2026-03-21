@@ -61,7 +61,7 @@ RP.schema = {
     },
     visibility = {
         _meta = { label = "Visibility", order = 2 },
-        { key = "hideFriendlyInInstance",      default = true,  label = "Hide Friendly in Instances" },
+        { key = "hideFriendlyInInstance",      default = true,  label = "Hide Friendly in Dungeons/Raids" },
         { header = "Enemies" },
         { key = "showEnemies",                 default = true,  label = "Show Enemies" },
         { key = "showEnemyMinions",            default = true,  label = "Enemy Minions" },

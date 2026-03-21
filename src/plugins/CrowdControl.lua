@@ -137,7 +137,7 @@ local function UpdateCC(plate)
         local iconFrame = container.icons[shown]
         if not iconFrame then
             iconFrame = RP.CreateIconFrame(container, db)
-            iconFrame:SetBackdropBorderColor(1, 1, 0, 1)
+            iconFrame:SetBorderColor(1, 1, 0, 1)
             container.icons[shown] = iconFrame
         end
 

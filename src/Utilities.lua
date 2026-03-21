@@ -5,23 +5,29 @@ local RP = ns.RP ---@type RP
 -- Shared icon frame factory (used by Auras, CrowdControl, etc.)
 ----------------------------------------------------------------
 
----@class RPIconFrame : Frame, BackdropTemplate
+---@class RPIconFrame : Frame
 ---@field Icon Texture
+---@field Border Texture
 ---@field Cooldown Cooldown
 ---@field Stack FontString
 ---@field auraInstanceID number?
+---@field SetBorderColor fun(self, r: number, g: number, b: number, a: number)
 
 function RP.CreateIconFrame(parent, db)
-    local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    local frame = CreateFrame("Frame", nil, parent)
     frame:SetSize(db.iconSize, db.iconSize)
-    frame:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        edgeSize = 1,
-    })
-    frame:SetBackdropColor(0, 0, 0, 1)
-    frame:SetBackdropBorderColor(0, 0, 0, 1)
     frame:EnableMouse(false)
+
+    -- Plain texture instead of BackdropTemplate to avoid taint from
+    -- SetCooldownFromDurationObject propagating to Backdrop.lua arithmetic
+    local border = frame:CreateTexture(nil, "BACKGROUND")
+    border:SetAllPoints()
+    border:SetColorTexture(0, 0, 0, 1)
+    frame.Border = border
+
+    function frame:SetBorderColor(r, g, b, a)
+        border:SetColorTexture(r, g, b, a)
+    end
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
     icon:SetPoint("TOPLEFT", 1, -1)

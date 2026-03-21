@@ -210,9 +210,9 @@ local function UpdateAuras(plate)
         end
 
         if isBuff then
-            iconFrame:SetBackdropBorderColor(0, 0.5, 1, 1)
+            iconFrame:SetBorderColor(0, 0.5, 1, 1)
         else
-            iconFrame:SetBackdropBorderColor(0.8, 0, 0, 1)
+            iconFrame:SetBorderColor(0.8, 0, 0, 1)
         end
 
         iconFrame.auraInstanceID = aura.auraInstanceID

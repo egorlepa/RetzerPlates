@@ -7,7 +7,7 @@ local RP = ns.RP ---@type RP
 
 RP:RegisterHook("SetCVars", function()
     local inInstance, instanceType = IsInInstance()
-    local inDungeon = inInstance and instanceType ~= "none"
+    local inDungeon = inInstance and (instanceType == "party" or instanceType == "raid")
     local vis = RP.db.visibility
     local dist = RP.db.distances
     local gen = RP.db.general
