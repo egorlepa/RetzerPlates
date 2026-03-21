@@ -14,11 +14,5 @@ ignore:
   - README.md
   - .github
 
-# Uncomment and fill in project IDs after creating projects on each platform:
-# manual-changelog:
-#   filename: CHANGELOG.md
-#   markup-type: markdown
-
-# curseforge-id: 123456
-# wago-id: xxxxxxxx
-# wowi-id: 12345
+curseforge-id: 1491659
+wago-id: nGv7ReNx
