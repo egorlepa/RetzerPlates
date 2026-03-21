@@ -1,0 +1,24 @@
+package-as: RetzerPlates
+
+enable-nolib-creation: no
+
+move-folders:
+  RetzerPlates/src: RetzerPlates
+
+ignore:
+  - references
+  - deploy.sh
+  - watch.sh
+  - logo.png
+  - CLAUDE.md
+  - README.md
+  - .github
+
+# Uncomment and fill in project IDs after creating projects on each platform:
+# manual-changelog:
+#   filename: CHANGELOG.md
+#   markup-type: markdown
+
+# curseforge-id: 123456
+# wago-id: xxxxxxxx
+# wowi-id: 12345
