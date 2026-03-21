@@ -12,6 +12,7 @@ ignore:
   - logo.png
   - CLAUDE.md
   - README.md
+  - DESCRIPTION.md
   - .github
 
 curseforge-id: 1491659
