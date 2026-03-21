@@ -13,7 +13,7 @@ local RP = ns.RP ---@type RP
 RP:RegisterSchema("level", {
     _meta = { label = "Level" },
     { key = "enabled",        default = true,  label = "Enable Level Text" },
-    { key = "fontSize",       default = 14,    label = "Font Size",          min = 8, max = 24, step = 1 },
+    { key = "fontSize",       default = 14,    label = "Font Size",          min = 8, max = 24, step = 1, scalable = true },
     { key = "hideMaxLevel",   default = true,  label = "Hide at Max Level" },
     { key = "hideForPlayers", default = true,  label = "Hide for Players" },
 })

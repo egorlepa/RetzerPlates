@@ -57,6 +57,8 @@ local ADDON_NAME, ns = ...
 ---@field SetLeftAnchor fun(self: RP, plate: RPPlate, frame: Frame)
 ---@field ClearLeftAnchor fun(self: RP, plate: RPPlate)
 ---@field GetLeftAnchor fun(self: RP, plate: RPPlate): Frame
+---@field GetScaleFactor fun(): number
+---@field RescaleProfile fun()
 local RP = {}
 ns.RP = RP
 _G.RetzerPlates = RP
@@ -187,6 +189,12 @@ local function onAddonLoaded(event, addon)
     aceDB.RegisterCallback(RP, "OnProfileChanged", OnProfileChanged)
     aceDB.RegisterCallback(RP, "OnProfileReset", OnProfileChanged)
     aceDB.RegisterCallback(RP, "OnProfileCopied", OnProfileChanged)
+
+    -- Auto-rescale sizes on first install based on current display
+    if not aceDB.global.autoScaled then
+        RP.RescaleProfile()
+        aceDB.global.autoScaled = true
+    end
 
     for _, mod in pairs(modules) do
         if mod.Initialize then

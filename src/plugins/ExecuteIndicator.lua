@@ -16,7 +16,7 @@ RP:RegisterSchema("execute", {
     { key = "enabled",   default = true,                                   label = "Enable Execute Indicator" },
     { key = "showEarly", default = 5,                                      label = "Show Early %",            min = 0, max = 20, step = 1 },
     { key = "color",     default = { r = 1.0, g = 1.0, b = 1.0, a = 0.6 }, label = "Mark Color" },
-    { key = "width",     default = 2,                                      label = "Mark Width",              min = 1, max = 6,  step = 1 },
+    { key = "width",     default = 2,                                      label = "Mark Width",              min = 1, max = 6,  step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------

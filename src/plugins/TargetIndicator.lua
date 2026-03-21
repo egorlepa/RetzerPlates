@@ -13,7 +13,7 @@ local RP = ns.RP ---@type RP
 RP:RegisterSchema("target", {
     _meta = { label = "Target" },
     { key = "enabled",    default = true,                          label = "Enable Target Arrows" },
-    { key = "arrowSize",  default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5 },
+    { key = "arrowSize",  default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5, scalable = true },
     { key = "arrowColor", default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
 })
 

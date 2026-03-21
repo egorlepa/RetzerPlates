@@ -19,7 +19,7 @@ RP:RegisterSchema("classification", {
     { key = "enabled",        default = true,  label = "Enable Classification Icons" },
     { key = "hideInInstance", default = true,  label = "Hide in Instances" },
     { key = "debug",          default = false, label = "Debug Classifications" },
-    { key = "iconSize",       default = 20,    label = "Icon Size", min = 8, max = 40, step = 1 },
+    { key = "iconSize",       default = 20,    label = "Icon Size", min = 8, max = 40, step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------

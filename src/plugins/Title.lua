@@ -13,7 +13,7 @@ local RP = ns.RP ---@type RP
 RP:RegisterSchema("title", {
     _meta = { label = "Title" },
     { key = "enabled",      default = true, label = "Enable Title Text" },
-    { key = "fontSize",     default = 16,   label = "Font Size",       min = 8, max = 20, step = 1 },
+    { key = "fontSize",     default = 16,   label = "Font Size",       min = 8, max = 20, step = 1, scalable = true },
     { key = "showGuild",    default = true, label = "Show Guild Name" },
     { key = "showNPCTitle", default = true, label = "Show NPC Title" },
 })

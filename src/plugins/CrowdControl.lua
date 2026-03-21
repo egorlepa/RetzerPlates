@@ -21,10 +21,10 @@ RP:RegisterSchema("crowdControl", {
     _meta = { label = "Crowd Control" },
     { key = "enabled",          default = true,  label = "Enable CC Icons" },
     { key = "debug",            default = false, label = "Debug CC Icons" },
-    { key = "iconSize",         default = 40,    label = "Icon Size",          min = 14, max = 80, step = 1 },
+    { key = "iconSize",         default = 40,    label = "Icon Size",          min = 14, max = 80, step = 1, scalable = true },
     { key = "maxIcons",         default = 3,     label = "Max Icons",          min = 1,  max = 10, step = 1 },
-    { key = "durationFontSize", default = 22,    label = "Duration Font Size", min = 8,  max = 30, step = 1 },
-    { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1 },
+    { key = "durationFontSize", default = 22,    label = "Duration Font Size", min = 8,  max = 30, step = 1, scalable = true },
+    { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------

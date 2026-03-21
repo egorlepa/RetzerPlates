@@ -12,8 +12,8 @@ local RP = ns.RP ---@type RP
 RP:RegisterSchema("name", {
     _meta = { label = "Name" },
     { key = "enabled",          default = true, label = "Enable Name Text" },
-    { key = "fontSize",         default = 16,   label = "Font Size",          min = 8, max = 30, step = 1 },
-    { key = "friendlyFontSize", default = 22,   label = "Friendly Font Size", min = 8, max = 30, step = 1 },
+    { key = "fontSize",         default = 16,   label = "Font Size",          min = 8, max = 30, step = 1, scalable = true },
+    { key = "friendlyFontSize", default = 22,   label = "Friendly Font Size", min = 8, max = 30, step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------

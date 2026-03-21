@@ -23,8 +23,8 @@ RP:RegisterSchema("quest", {
     { key = "debug",        default = false,                            label = "Debug Quest" },
     { key = "colorEnemy",   default = { r = 1.0, g = 0.37, b = 0.0 },  label = "Enemy Quest Color" },
     { key = "colorNeutral", default = { r = 1.0, g = 0.65, b = 0.0 },  label = "Neutral Quest Color" },
-    { key = "iconSize",     default = 30,                               label = "Icon Size",             min = 14, max = 60, step = 1 },
-    { key = "fontSize",     default = 14,                               label = "Font Size",             min = 8,  max = 24, step = 1 },
+    { key = "iconSize",     default = 30,                               label = "Icon Size",             min = 14, max = 60, step = 1, scalable = true },
+    { key = "fontSize",     default = 14,                               label = "Font Size",             min = 8,  max = 24, step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------

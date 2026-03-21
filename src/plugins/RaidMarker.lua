@@ -14,7 +14,7 @@ RP:RegisterSchema("raidMarker", {
     _meta = { label = "Raid Marker" },
     { key = "enabled",  default = true,  label = "Enable Raid Markers" },
     { key = "debug",    default = false, label = "Debug Raid Markers" },
-    { key = "iconSize", default = 40,    label = "Icon Size", min = 14, max = 60, step = 1 },
+    { key = "iconSize", default = 40,    label = "Icon Size", min = 14, max = 60, step = 1, scalable = true },
 })
 
 RP:RegisterRightSlot("raidMarker")

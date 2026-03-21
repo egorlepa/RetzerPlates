@@ -31,8 +31,8 @@ RP:RegisterSchema("castbar", {
     _meta = { label = "Cast Bar" },
     { key = "enabled",      default = true,  label = "Enable Cast Bar" },
     { key = "debug",        default = false, label = "Debug Cast Bar" },
-    { key = "height",       default = 20,    label = "Height",         min = 8, max = 40,  step = 1 },
-    { key = "fontSize",     default = 16,    label = "Font Size",      min = 8, max = 24,  step = 1 },
+    { key = "height",       default = 20,    label = "Height",         min = 8, max = 40,  step = 1, scalable = true },
+    { key = "fontSize",     default = 16,    label = "Font Size",      min = 8, max = 24,  step = 1, scalable = true },
     { key = "fadeDuration", default = 0.5,   label = "Fade Duration",  min = 0, max = 2.0, step = 0.1 },
 })
 

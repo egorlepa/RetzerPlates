@@ -21,8 +21,8 @@ local RP = ns.RP ---@type RP
 
 RP:RegisterSchema("healthbar", {
     _meta = { label = "Health Bar" },
-    { key = "width",           default = 200,                              label = "Width",            min = 80, max = 400, step = 5 },
-    { key = "height",          default = 20,                               label = "Height",           min = 4,  max = 60,  step = 1 },
+    { key = "width",           default = 200,                              label = "Width",            min = 80, max = 400, step = 5, scalable = true },
+    { key = "height",          default = 20,                               label = "Height",           min = 4,  max = 60,  step = 1, scalable = true },
     { key = "colorByClass",    default = true,                             label = "Color by Class" },
     { key = "colorByReaction", default = true,                             label = "Color by Reaction" },
     { key = "colorFriendly",   default = { r = 0.29, g = 0.69, b = 0.30 }, label = "Friendly Color" },

@@ -44,10 +44,10 @@ RP.schema = {
     general = {
         _meta = { label = "General", order = 1 },
         { key = "enabled",              default = true,  label = "Enable RetzerPlates",  reload = true },
-        { key = "yOffset",              default = 7,     label = "Y Offset",             min = -50, max = 50,  step = 1 },
+        { key = "yOffset",              default = 7,     label = "Y Offset",             min = -50, max = 50,  step = 1, scalable = true },
         { header = "Hitbox" },
-        { key = "hitboxWidth",  default = 250,   label = "Width",  min = 100, max = 400, step = 10 },
-        { key = "hitboxHeight", default = 75,    label = "Height", min = 30,  max = 200, step = 5 },
+        { key = "hitboxWidth",  default = 250,   label = "Width",  min = 100, max = 400, step = 10, scalable = true },
+        { key = "hitboxHeight", default = 75,    label = "Height", min = 30,  max = 200, step = 5, scalable = true },
         { key = "debug",        default = false, label = "Debug Hitboxes" },
         { header = "Alpha" },
         { key = "alpha",             default = 0.75,  label = "Normal Alpha",        min = 0.1,    max = 1.0, step = 0.05 },
@@ -97,6 +97,35 @@ function RP:RegisterSchema(key, section)
         nextPluginOrder = nextPluginOrder + 1
     end
     RP.schema[key] = section
+end
+
+----------------------------------------------------------------
+-- Display scaling
+----------------------------------------------------------------
+
+local BASELINE_SCALE = 768 / 1440 -- pixel-perfect UI scale for 1440p
+
+function RP.GetScaleFactor()
+    return BASELINE_SCALE / UIParent:GetEffectiveScale()
+end
+
+function RP.RescaleProfile()
+    local factor = RP.GetScaleFactor()
+    for sectionKey, entries in pairs(RP.schema) do
+        for _, entry in ipairs(entries) do
+            if entry.scalable and entry.key and type(entry.default) == "number" then
+                local scaled = entry.default * factor
+                if entry.step and entry.step >= 1 then
+                    scaled = math.floor(scaled + 0.5)
+                end
+                if entry.min then scaled = math.max(entry.min, scaled) end
+                if entry.max then scaled = math.min(entry.max, scaled) end
+                if RP.db[sectionKey] then
+                    RP.db[sectionKey][entry.key] = scaled
+                end
+            end
+        end
+    end
 end
 
 ----------------------------------------------------------------

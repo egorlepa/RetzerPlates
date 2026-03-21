@@ -568,6 +568,33 @@ local function PopulateProfileSection(scrollChild, repopulate)
     end
     y = y - 28 - WIDGET_GAP
 
+    -- Display scaling
+    y = y - HEADER_GAP
+    h = CreateHeader(scrollChild, "Display Scaling", y)
+    y = y - h - WIDGET_GAP
+
+    local scaleInfo = scrollChild:CreateFontString(nil, "OVERLAY")
+    scaleInfo:SetFont(STANDARD_TEXT_FONT, 11, "")
+    scaleInfo:SetTextColor(0.5, 0.5, 0.5)
+    scaleInfo:SetText(string.format("Scale factor: %.2f (baseline: 1440p @ 0.53)", RP.GetScaleFactor()))
+    scaleInfo:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    y = y - 16 - WIDGET_GAP
+
+    local rescaleBtn = CreateButton(scrollChild, "Recalculate Sizes", 150, function()
+        RP.RescaleProfile()
+        ScheduleRefresh()
+        repopulate()
+    end)
+    rescaleBtn:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    y = y - 28 - WIDGET_GAP
+
+    local scaleWarning = scrollChild:CreateFontString(nil, "OVERLAY")
+    scaleWarning:SetFont(STANDARD_TEXT_FONT, 10, "")
+    scaleWarning:SetTextColor(0.6, 0.5, 0.3)
+    scaleWarning:SetText("Resets all size settings to scaled defaults. Custom size tweaks will be lost.")
+    scaleWarning:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, y)
+    y = y - 16 - WIDGET_GAP
+
     -- Character info
     y = y - HEADER_GAP
     h = CreateHeader(scrollChild, "Current Character", y)

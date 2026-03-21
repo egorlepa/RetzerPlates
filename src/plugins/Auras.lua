@@ -25,15 +25,15 @@ RP:RegisterSchema("auras", {
     _meta = { label = "Auras" },
     { key = "enabled",          default = true,  label = "Enable Auras" },
     { key = "debug",            default = false, label = "Debug Auras" },
-    { key = "iconSize",         default = 30,    label = "Icon Size",          min = 14, max = 60, step = 1 },
-    { key = "spacing",          default = 2,     label = "Spacing",            min = 0,  max = 10, step = 1 },
-    { key = "groupGap",         default = 10,    label = "Group Gap",          min = 0,  max = 30, step = 1 },
+    { key = "iconSize",         default = 30,    label = "Icon Size",          min = 14, max = 60, step = 1, scalable = true },
+    { key = "spacing",          default = 2,     label = "Spacing",            min = 0,  max = 10, step = 1, scalable = true },
+    { key = "groupGap",         default = 10,    label = "Group Gap",          min = 0,  max = 30, step = 1, scalable = true },
     { key = "maxIcons",         default = 6,     label = "Max Icons",          min = 1,  max = 20, step = 1 },
     { key = "showDebuffs",      default = true,  label = "Show Debuffs" },
     { key = "showBuffs",        default = true,  label = "Show Buffs" },
     { key = "onlyMine",         default = true,  label = "Only Mine" },
-    { key = "durationFontSize", default = 20,    label = "Duration Font Size", min = 8,  max = 30, step = 1 },
-    { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1 },
+    { key = "durationFontSize", default = 20,    label = "Duration Font Size", min = 8,  max = 30, step = 1, scalable = true },
+    { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1, scalable = true },
 })
 
 ----------------------------------------------------------------
