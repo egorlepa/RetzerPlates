@@ -846,7 +846,7 @@ local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 if LDB and LDBIcon then
     local broker = LDB:NewDataObject("RetzerPlates", {
         type = "data source",
-        icon = "Interface\\AddOns\\RetzerPlates\\icon",
+        icon = "Interface\\AddOns\\RetzerPlates\\media\\icon",
         text = "RetzerPlates",
         showInCompartment = true,
 

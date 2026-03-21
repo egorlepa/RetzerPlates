@@ -4,7 +4,7 @@
 ## Version: 0.1.0
 ## Interface: 120000
 ## SavedVariables: RetzerPlatesDB
-## IconTexture: Interface\AddOns\RetzerPlates\icon256.tga
+## IconTexture: Interface\AddOns\RetzerPlates\media\icon256.tga
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua

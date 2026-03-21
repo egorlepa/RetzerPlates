@@ -25,7 +25,7 @@ local currentTarget = nil
 
 local function CreateArrow(parent, pointRight)
     local tex = parent:CreateTexture(nil, "OVERLAY")
-    tex:SetTexture("Interface\\AddOns\\RetzerPlates\\plugins\\arrow.tga")
+    tex:SetTexture("Interface\\AddOns\\RetzerPlates\\media\\arrow.tga")
     local size = RP.db.target.arrowSize
     tex:SetSize(size, size)
     tex:SetRotation(pointRight and 0 or math.rad(180))
