@@ -18,7 +18,7 @@ jobs:
 
       - uses: BigWigsMods/packager@v2
         with:
-          args: -g retail -p 1491659 -a nGv7ReNx -w 27086
+          args: -g retail
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}

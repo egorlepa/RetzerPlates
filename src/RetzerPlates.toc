@@ -5,6 +5,9 @@
 ## Interface: 120000, 120001
 ## SavedVariables: RetzerPlatesDB
 ## IconTexture: Interface\AddOns\RetzerPlates\media\icon256.tga
+## X-Curse-Project-ID: 1491659
+## X-WoWI-ID: 27086
+## X-Wago-ID: nGv7ReNx
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua

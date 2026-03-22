@@ -303,10 +303,17 @@ end
 ----------------------------------------------------------------
 
 local function ResetSection(sectionKey)
-    local section = RP.db[sectionKey]
-    if not section then return end
-    for k in pairs(section) do
-        section[k] = nil
+    local defaults = RP.defaults[sectionKey]
+    if not defaults or not RP.db[sectionKey] then return end
+    for k, v in pairs(defaults) do
+        if type(v) == "table" then
+            local cur = RP.db[sectionKey][k]
+            if cur then
+                for tk, tv in pairs(v) do cur[tk] = tv end
+            end
+        else
+            RP.db[sectionKey][k] = v
+        end
     end
     ScheduleRefresh()
 end
