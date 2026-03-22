@@ -1,7 +1,7 @@
 ## Title: RetzerPlates
 ## Notes: Nameplate addon
 ## Author: Retzer
-## Version: 0.1.0
+## Version: @project-version@
 ## Interface: 120000, 120001
 ## SavedVariables: RetzerPlatesDB
 ## IconTexture: Interface\AddOns\RetzerPlates\media\icon256.tga
