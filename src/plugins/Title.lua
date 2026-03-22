@@ -93,7 +93,7 @@ RP:WrapHook("UpdateName", function(original, plate)
         return
     end
 
-    local title = (RP.IsPassive(plate) or RP.IsFriendly(plate.frameType)) and GetTitleText(unit, RP.db.title) or nil
+    local title = RP.IsPassive(plate) and GetTitleText(unit, RP.db.title) or nil
     if title then
         plate.Title:SetText(title)
         plate.Title:Show()
