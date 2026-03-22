@@ -15,6 +15,7 @@ RP:RegisterSchema("target", {
     { key = "enabled",    default = true,                          label = "Enable Target Arrows" },
     { key = "arrowSize",  default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5, scalable = true },
     { key = "arrowColor", default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
+    { key = "scale",      default = 1.0,                           label = "Target Scale",        min = 1.0, max = 1.5, step = 0.05 },
 })
 
 ----------------------------------------------------------------
@@ -67,7 +68,7 @@ end)
 RP:WrapHook("OnLeftLayoutChanged", function(original, plate, leftmostAnchor)
     original(plate, leftmostAnchor)
     if plate.Health and plate.Health.targetArrowL then
-        local xOffset = (leftmostAnchor ~= plate.Health) and leftmostAnchor:GetWidth() or 0
+        local xOffset = (leftmostAnchor ~= plate.Health) and (leftmostAnchor._cleanWidth or leftmostAnchor:GetWidth()) or 0
         plate.Health.targetArrowL:ClearAllPoints()
         plate.Health.targetArrowL:SetPoint("RIGHT", plate.Health, "LEFT", -xOffset, 0)
     end
@@ -75,14 +76,19 @@ end)
 
 local function ShowArrows(plate, show)
     if not plate.Health or not plate.Health.targetArrowL then return end
-    if not RP.db.target.enabled or RP.IsPassive(plate) then show = false end
+    local db = RP.db.target
+    if not db.enabled or RP.IsPassive(plate) then show = false end
 
     if show then
         plate.Health.targetArrowL:Show()
         plate.Health.targetArrowR:Show()
+        if db.scale ~= 1.0 then
+            plate:SetScale(db.scale)
+        end
     else
         plate.Health.targetArrowL:Hide()
         plate.Health.targetArrowR:Hide()
+        plate:SetScale(1)
     end
 end
 

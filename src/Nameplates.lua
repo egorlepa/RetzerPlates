@@ -114,8 +114,12 @@ function NP:Initialize()
     local function OnFactionChanged(_, unitToken)
         local plate = GetPlateByUnit(unitToken)
         if not plate then return end
-        plate.frameType = RP:Call("GetFrameType", unitToken)
-        RP:Call("UpdatePlate", plate)
+        -- Defer by one frame — UnitCanAttack may not reflect the new state yet
+        C_Timer.After(0, function()
+            if not plate.unit then return end
+            plate.frameType = RP:Call("GetFrameType", plate.unit)
+            RP:Call("UpdatePlate", plate)
+        end)
     end
     RP:RegisterEvent("UNIT_FACTION", OnFactionChanged)
     RP:RegisterEvent("UNIT_FLAGS", OnFactionChanged)

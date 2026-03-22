@@ -77,7 +77,9 @@ RP:WrapHook("ConstructHealth", function(original, plate)
     -- Frame width includes gap so GetWidth() accounts for spacing when
     -- TargetIndicator reads it to push the left arrow further out.
     local frame = CreateFrame("Frame", nil, plate.Health) --[[@as RPClassificationFrame]]
-    frame:SetSize(db.iconSize + ICON_GAP + BAR_GAP, db.iconSize)
+    local frameWidth = db.iconSize + ICON_GAP + BAR_GAP
+    frame:SetSize(frameWidth, db.iconSize)
+    frame._cleanWidth = frameWidth
     frame:EnableMouse(false)
     frame:SetPoint("RIGHT", plate.Health, "LEFT", 0, 0)
     frame:Hide()
