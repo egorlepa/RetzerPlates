@@ -82,10 +82,13 @@ RP:RegisterHook("SetCVars", function()
 
         -- Disable Blizzard overlays (hardcoded)
         nameplateThreatDisplay                = 0,
-        nameplateEnemyNpcAuraDisplay          = 0,
-        nameplateEnemyPlayerAuraDisplay       = 0,
-        nameplateFriendlyPlayerAuraDisplay    = 0,
-        nameplateShowDebuffsOnFriendly        = 0,
+
+        -- Aura display CVars must stay enabled so Blizzard's C engine
+        -- populates AurasFrame — we read its filtered aura IDs.
+        nameplateEnemyNpcAuraDisplay          = "1G",
+        nameplateEnemyPlayerAuraDisplay       = "1G",
+        nameplateFriendlyPlayerAuraDisplay    = "1G",
+        nameplateShowDebuffsOnFriendly        = 1,
     }
 
     for name, value in pairs(cvars) do
@@ -138,6 +141,24 @@ function RP.IsPassive(plate)
     return plate.unit ~= nil and not UnitCanAttack("player", plate.unit)
 end
 
+function RP.IsMinor(unit)
+    if not unit then return false end
+
+    -- "minus" classification (trivial mobs, some guardians)
+    if UnitClassification(unit) == "minus" then return true end
+
+    -- Pets, minions, guardians
+    local isPet = UnitIsMinion(unit) or UnitIsOtherPlayersPet(unit) or UnitIsUnit("pet", unit)
+    if issecretvalue and issecretvalue(isPet) then return false end
+    if isPet then return true end
+
+    -- Totems
+    local ok, ctype = pcall(UnitCreatureType, unit)
+    if ok and not (issecretvalue and issecretvalue(ctype)) and ctype == "Totem" then return true end
+
+    return false
+end
+
 ----------------------------------------------------------------
 -- Classification
 ----------------------------------------------------------------
@@ -175,6 +196,7 @@ end)
 ---@field unit string?
 ---@field unitGUID string?
 ---@field frameType RPFrameType?
+---@field isMinor boolean?
 ---@field _hitboxDebug RPHitboxDebug?
 
 ---@param parent BlizzPlate
@@ -205,6 +227,8 @@ end)
 -- Suppress default Blizzard nameplate. Called on NAME_PLATE_UNIT_ADDED
 -- because the UnitFrame child doesn't exist yet at NAME_PLATE_CREATED time.
 -- Can't Hide() UnitFrame — click hitbox is tied to it. Force alpha to 0 instead.
+-- We do NOT UnregisterAllEvents — the Blizzard UnitFrame must keep processing
+-- events so its AurasFrame stays populated. We read its filtered aura IDs.
 local hookedPlates = {}
 ---@param parent BlizzPlate
 RP:RegisterHook("SuppressBlizzardPlate", function(parent)
@@ -213,7 +237,6 @@ RP:RegisterHook("SuppressBlizzardPlate", function(parent)
     if not parent.UnitFrame then return end
     if parent.UnitFrame:IsForbidden() then return end
 
-    parent.UnitFrame:UnregisterAllEvents()
     parent.UnitFrame:SetAlpha(0)
 
     if not hookedPlates[parent] then
@@ -243,13 +266,31 @@ end)
 
 ---@param plate RPPlate
 RP:RegisterHook("UpdateLayout", function(plate)
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+
     if RP.IsPassive(plate) then
         plate.Health:SetStatusBarColor(0, 0, 0, 0)
         plate.Health.bg:Hide()
         plate.Health.border:Hide()
-    else
+    elseif isMinorEnemy then
+        local sdb = RP.db.simplified
+        plate.Health:SetSize(sdb.enemyWidth, sdb.enemyHeight)
         plate.Health.bg:Show()
         plate.Health.border:Show()
+        if plate.CastBar then
+            plate.CastBar:SetSize(sdb.enemyWidth, sdb.enemyCastBarHeight)
+            plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, sdb.enemyCastBarFontSize, "OUTLINE")
+            plate.CastBar._iconFrame:Hide()
+        end
+    else
+        plate.Health:SetSize(RP.db.healthbar.width, RP.db.healthbar.height)
+        plate.Health.bg:Show()
+        plate.Health.border:Show()
+        if plate.CastBar then
+            plate.CastBar:SetSize(RP.db.healthbar.width, RP.db.castbar.height)
+            plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, RP.db.castbar.fontSize, "OUTLINE")
+            plate.CastBar._iconFrame:Show()
+        end
     end
 
     local dbg = plate._hitboxDebug

@@ -15,6 +15,7 @@ local RP = ns.RP ---@type RP
 ---@field border Frame
 ---@field Icon Texture
 ---@field Text FontString
+---@field _iconFrame Frame
 ---@field _fadeOut number?
 ---@field _fadeDuration number?
 ---@field _durationObject table?
@@ -97,6 +98,7 @@ RP:RegisterHook("ConstructCastBar", function(plate)
     plate.CastBar.border = border
     plate.CastBar.Icon = icon
     plate.CastBar.Text = text
+    plate.CastBar._iconFrame = iconFrame
 
     -- Debug mode: auto-cycle fake casts
     if db.debug then

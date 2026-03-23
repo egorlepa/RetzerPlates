@@ -32,6 +32,7 @@ local function InitPlate(frame, unitToken)
     plate.unit = unitToken
     plate.unitGUID = UnitGUID(unitToken)
     plate.frameType = RP:Call("GetFrameType", unitToken)
+    plate.isMinor = RP.IsMinor(unitToken) or RP.db.simplified.debug
 
     RP:Call("UpdatePlate", plate)
     RP:Call("StartCastBarTicker", plate)
@@ -86,6 +87,7 @@ function NP:Initialize()
         plate.unit = nil
         plate.unitGUID = nil
         plate.frameType = nil
+        plate.isMinor = nil
         plate:Hide()
     end)
 

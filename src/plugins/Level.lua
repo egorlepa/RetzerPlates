@@ -95,7 +95,7 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     local db = RP.db.level
     plate.Level:ClearAllPoints()
 
-    if RP.IsPassive(plate) then
+    if RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         plate.Level:Hide()
         return
     end

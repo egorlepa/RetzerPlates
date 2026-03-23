@@ -36,6 +36,17 @@ local RP = ns.RP ---@type RP
 ---@field showFriendlyPlayerTotems boolean
 ---@field showFriendlyPlayerMinions boolean
 
+---@class RPSimplifiedConfig
+---@field enabled boolean
+---@field debug boolean
+---@field passiveFontSize number
+---@field passiveTitleFontSize number
+---@field enemyWidth number
+---@field enemyHeight number
+---@field enemyCastBarHeight number
+---@field enemyCastBarFontSize number
+---@field enemyFontSize number
+
 ---@class RPDistancesConfig
 ---@field maxDistance number
 ---@field playerMaxDistance number
@@ -77,8 +88,22 @@ RP.schema = {
         { key = "showFriendlyPlayerTotems",    default = false, label = "Friendly Player Totems" },
         { key = "showFriendlyPlayerMinions",   default = false, label = "Friendly Player Minions" },
     },
+    simplified = {
+        _meta = { label = "Simplified Plates", order = 3 },
+        { key = "enabled",            default = true, label = "Enable Simplified Plates" },
+        { key = "debug",              default = false, label = "Debug (Force All Minor)" },
+        { header = "Passive Minor Units" },
+        { key = "passiveFontSize",      default = 16,  label = "Name Font Size",       min = 8, max = 30, step = 1, scalable = true },
+        { key = "passiveTitleFontSize", default = 12,  label = "Title Font Size",      min = 8, max = 20, step = 1, scalable = true },
+        { header = "Enemy Minor Units" },
+        { key = "enemyWidth",           default = 100, label = "Health Bar Width",     min = 40, max = 300, step = 5, scalable = true },
+        { key = "enemyHeight",          default = 14,  label = "Health Bar Height",    min = 4,  max = 40,  step = 1, scalable = true },
+        { key = "enemyCastBarHeight",   default = 14,  label = "Cast Bar Height",      min = 4,  max = 40,  step = 1, scalable = true },
+        { key = "enemyCastBarFontSize", default = 14,  label = "Cast Bar Font Size",   min = 8, max = 24, step = 1, scalable = true },
+        { key = "enemyFontSize",        default = 14,  label = "Name Font Size",       min = 8, max = 30, step = 1, scalable = true },
+    },
     distances = {
-        _meta = { label = "Distances", order = 3 },
+        _meta = { label = "Distances", order = 4 },
         { key = "maxDistance",       default = 60, label = "Max Distance",        min = 20, max = 60, step = 5 },
         { key = "playerMaxDistance", default = 60, label = "Player Max Distance", min = 20, max = 60, step = 5 },
     },

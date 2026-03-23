@@ -73,7 +73,7 @@ local function UpdateAbsorb(plate)
     if not bar or not calc then return end
 
     local unit = plate.unit
-    if not unit or RP.IsPassive(plate) then
+    if not unit or RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         bar:Hide()
         return
     end

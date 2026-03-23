@@ -127,6 +127,7 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     local shouldShow = db.enabled
         and not (db.hideInInstance and inInstance)
         and not RP.IsPassive(plate)
+        and not (plate.isMinor and RP.db.simplified.enabled)
         and classification
         and (db.debug or SHOW_FOR[classification])
 

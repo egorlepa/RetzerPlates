@@ -231,7 +231,7 @@ end)
 RP:WrapHook("UpdateLayout", function(original, plate)
     original(plate)
 
-    if RP.IsPassive(plate) then
+    if RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         if plate.Health.executeMark then plate.Health.executeMark:Hide() end
         if plate.Health.executeMarkUpper then plate.Health.executeMarkUpper:Hide() end
     end
@@ -248,6 +248,7 @@ RP:WrapHook("UpdateHealth", function(original, plate)
 
     if not plate.unit then return end
     if RP.IsPassive(plate) then return end
+    if plate.isMinor and RP.db.simplified.enabled then return end
     if not thresholdDetected then RefreshThresholds() end
 
     -- Lower execute

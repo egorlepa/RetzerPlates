@@ -113,10 +113,14 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     if not plate.Title then return end
 
     local db = RP.db.title
+    local sdb = RP.db.simplified
+    local isSimplified = plate.isMinor and sdb.enabled
+
     plate.Title:ClearAllPoints()
 
     if RP.IsPassive(plate) then
-        plate.Title:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+        local fontSize = isSimplified and sdb.passiveTitleFontSize or db.fontSize
+        plate.Title:SetFont(STANDARD_TEXT_FONT, fontSize, "OUTLINE")
         plate.Title:SetPoint("TOP", plate.Name, "BOTTOM", 0, -1)
     else
         plate.Title:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")

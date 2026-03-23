@@ -112,8 +112,8 @@ local function UpdateCC(plate)
     local unit = plate.unit
     if not unit then return end
 
-    -- Hide on passive units
-    if RP.IsPassive(plate) then
+    -- Hide on passive or simplified minor units
+    if RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         for _, icon in ipairs(container.icons) do
             icon:Hide()
         end
