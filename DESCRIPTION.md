@@ -10,7 +10,7 @@ RetzerPlates is designed to be pixel-perfect out of the box — no spending hour
 - **Absorb shields** overlay using Midnight's heal prediction API
 - **Cast bars** with spell icon, interruptible/non-interruptible coloring, interrupt source display, and fade animations
 - **Threat coloring** with separate color schemes for tanks and DPS/healers
-- **Aura tracking** — debuffs and buffs with cooldown spirals, duration timers, and stack counts
+- **Aura tracking** — debuffs and buffs with cooldown spirals, duration timers, and stack counts. Uses Blizzard's own nameplate aura filtering to show only meaningful buffs/debuffs
 - **Crowd control icons** — dedicated CC display with prominent icons
 - **Execute indicators** — auto-detects execute thresholds per class/spec/talents (Warrior, Hunter, Mage, Priest, Paladin, Warlock, Rogue, Death Knight, Monk)
 - **Quest indicators** — shows quest objective progress on relevant mobs
@@ -20,6 +20,7 @@ RetzerPlates is designed to be pixel-perfect out of the box — no spending hour
 - **Level display** with difficulty coloring
 - **Name and title/guild** text
 - **Mouseover highlight**
+- **Simplified plates** — pets, totems, minions, and minor mobs get compact plates with reduced visual clutter
 - **Passive unit handling** — friendly NPCs get clean name-only plates
 
 ## Auto-Scaling
