@@ -31,7 +31,7 @@ RP:RegisterSchema("auras", {
     { key = "maxIcons",         default = 6,     label = "Max Icons",          min = 1,  max = 20, step = 1 },
     { key = "showDebuffs",      default = true,  label = "Show Debuffs" },
     { key = "showBuffs",        default = true,  label = "Show Buffs" },
-    { key = "onlyMine",         default = true,  label = "Only Mine" },
+    { key = "onlyMine",         default = true,  label = "Only My Debuffs" },
     { key = "durationFontSize", default = 20,    label = "Duration Font Size", min = 8,  max = 30, step = 1, scalable = true },
     { key = "stackFontSize",    default = 16,    label = "Stack Font Size",    min = 8,  max = 24, step = 1, scalable = true },
 })
@@ -63,16 +63,52 @@ end)
 -- Fetch auras via C_UnitAuras
 ----------------------------------------------------------------
 
-local function GetUnitAuras(unit, db)
+--- Read auraInstanceIDs that Blizzard's nameplate chose to display.
+--- The C engine filters these; we just read the result.
+local function GetBlizzardAuraIDs(plate)
+    local parent = plate:GetParent()
+    local uf = parent and parent.UnitFrame
+    if not uf or uf:IsForbidden() then return nil, nil end
+
+    local aurasFrame = uf.AurasFrame
+    if not aurasFrame then return nil, nil end
+
+    local blizzBuffs, blizzDebuffs
+
+    local buffList = aurasFrame.BuffListFrame
+    if buffList then
+        blizzBuffs = {}
+        for _, child in ipairs(buffList:GetLayoutChildren()) do
+            if child.auraInstanceID then
+                blizzBuffs[child.auraInstanceID] = true
+            end
+        end
+    end
+
+    local debuffList = aurasFrame.DebuffListFrame
+    if debuffList then
+        blizzDebuffs = {}
+        for _, child in ipairs(debuffList:GetLayoutChildren()) do
+            if child.auraInstanceID then
+                blizzDebuffs[child.auraInstanceID] = true
+            end
+        end
+    end
+
+    return blizzBuffs, blizzDebuffs
+end
+
+local function GetUnitAuras(unit, db, blizzBuffs, blizzDebuffs)
     local buffs = {}
     local debuffs = {}
 
     if db.showBuffs then
-        local filter = db.onlyMine and "HELPFUL|PLAYER" or "HELPFUL"
-        local results = C_UnitAuras.GetUnitAuras(unit, filter, nil, Enum.UnitAuraSortRule.Expiration)
+        local results = C_UnitAuras.GetUnitAuras(unit, "HELPFUL", nil, Enum.UnitAuraSortRule.Expiration)
         if results then
             for _, aura in ipairs(results) do
-                buffs[#buffs + 1] = aura
+                if not blizzBuffs or blizzBuffs[aura.auraInstanceID] then
+                    buffs[#buffs + 1] = aura
+                end
             end
         end
     end
@@ -82,7 +118,9 @@ local function GetUnitAuras(unit, db)
         local results = C_UnitAuras.GetUnitAuras(unit, filter, nil, Enum.UnitAuraSortRule.Expiration)
         if results then
             for _, aura in ipairs(results) do
-                debuffs[#debuffs + 1] = aura
+                if not blizzDebuffs or blizzDebuffs[aura.auraInstanceID] then
+                    debuffs[#debuffs + 1] = aura
+                end
             end
         end
     end
@@ -146,8 +184,8 @@ local function UpdateAuras(plate)
     local unit = plate.unit
     if not unit then return end
 
-    -- Hide auras on passive units
-    if RP.IsPassive(plate) then
+    -- Hide auras on passive or simplified minor units
+    if RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         for _, icon in ipairs(container.icons) do
             icon:Hide()
         end
@@ -160,7 +198,8 @@ local function UpdateAuras(plate)
     if isDebug then
         buffs, debuffs = GetDebugAuras(db)
     else
-        buffs, debuffs = GetUnitAuras(unit, db)
+        local blizzBuffs, blizzDebuffs = GetBlizzardAuraIDs(plate)
+        buffs, debuffs = GetUnitAuras(unit, db, blizzBuffs, blizzDebuffs)
     end
     local groupGap = db.groupGap
 
@@ -252,19 +291,23 @@ RP:WrapHook("UpdatePlate", function(original, plate)
     UpdateAuras(plate)
 end)
 
--- Listen for UNIT_AURA to refresh in real-time
+-- Listen for UNIT_AURA to refresh in real-time.
+-- Defer by one frame so Blizzard's UnitFrame processes the event first
+-- and populates its AurasFrame — we read from that as a whitelist.
 RP:RegisterEvent("UNIT_AURA", function(_, unitToken)
     if not unitToken:find("nameplate") then return end
-    local NP = RP:GetModule("Nameplates")
-    if not NP then return end
+    C_Timer.After(0, function()
+        local NP = RP:GetModule("Nameplates")
+        if not NP then return end
 
-    local frame = C_NamePlate.GetNamePlateForUnit(unitToken)
-    if not frame then return end
+        local frame = C_NamePlate.GetNamePlateForUnit(unitToken)
+        if not frame then return end
 
-    local plate = NP.plates[frame]
-    if not plate then return end
+        local plate = NP.plates[frame]
+        if not plate or not plate.unit then return end
 
-    UpdateAuras(plate)
+        UpdateAuras(plate)
+    end)
 end)
 
 -- Clear on plate removal
