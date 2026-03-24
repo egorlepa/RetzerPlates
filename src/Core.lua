@@ -18,9 +18,11 @@ local ADDON_NAME, ns = ...
 ---@class RPDatabase
 ---@field general RPGeneralConfig
 ---@field visibility RPVisibilityConfig
+---@field simplified RPSimplifiedConfig
 ---@field distances RPDistancesConfig
 ---@field healthbar RPHealthbarConfig
 ---@field name RPNameConfig
+---@field title RPTitleConfig
 ---@field castbar RPCastbarConfig
 ---@field threat RPThreatConfig
 ---@field auras RPAurasConfig
@@ -30,6 +32,8 @@ local ADDON_NAME, ns = ...
 ---@field quest RPQuestConfig
 ---@field raidMarker RPRaidMarkerConfig
 ---@field classification RPClassificationConfig
+---@field level RPLevelConfig
+---@field absorb RPAbsorbConfig
 ---@field minimap table
 
 ---@class RPModule
@@ -47,6 +51,7 @@ local ADDON_NAME, ns = ...
 ---@field version string
 ---@field IsFriendly fun(frameType: RPFrameType): boolean
 ---@field IsPassive fun(plate: RPPlate): boolean
+---@field IsMinor fun(unit: string): boolean
 ---@field CreateIconFrame fun(parent: Frame, db: table): RPIconFrame
 ---@field RegisterSchema fun(self: RP, key: string, section: RPSchemaSection)
 ---@field RegisterRightSlot fun(self: RP, name: string)
@@ -168,7 +173,7 @@ end
 -- Initialization
 ----------------------------------------------------------------
 
-local function onAddonLoaded(event, addon)
+local function onAddonLoaded(_, addon)
     if addon ~= ADDON_NAME then return end
     RP:UnregisterEvent("ADDON_LOADED", onAddonLoaded)
 

@@ -5,6 +5,7 @@ local RP = ns.RP ---@type RP
 ---@field Health RPHealthBar
 
 ---@class RPHealthBar : StatusBar
+---@field barTexture Texture
 ---@field bg Texture
 ---@field border Frame
 ---@field highlight Texture

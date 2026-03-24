@@ -76,7 +76,7 @@ RP:WrapHook("UpdateName", function(original, plate)
         return
     end
 
-    plate.Level:SetText(level)
+    plate.Level:SetText(tostring(level))
     local color = GetQuestDifficultyColor(level)
     plate.Level:SetTextColor(color.r, color.g, color.b)
     plate.Level:Show()

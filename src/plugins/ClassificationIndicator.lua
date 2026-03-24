@@ -3,6 +3,7 @@ local RP = ns.RP ---@type RP
 
 ---@class RPClassificationFrame : Frame
 ---@field tex Texture
+---@field _cleanWidth number
 
 ---@class RPPlate
 ---@field classificationIcon RPClassificationFrame?

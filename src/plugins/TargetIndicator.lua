@@ -9,6 +9,7 @@ local RP = ns.RP ---@type RP
 ---@field enabled boolean
 ---@field arrowSize number
 ---@field arrowColor RPColor
+---@field scale number
 
 RP:RegisterSchema("target", {
     _meta = { label = "Target" },
@@ -68,7 +69,7 @@ end)
 RP:WrapHook("OnLeftLayoutChanged", function(original, plate, leftmostAnchor)
     original(plate, leftmostAnchor)
     if plate.Health and plate.Health.targetArrowL then
-        local xOffset = (leftmostAnchor ~= plate.Health) and (leftmostAnchor._cleanWidth or leftmostAnchor:GetWidth()) or 0
+        local xOffset = (leftmostAnchor ~= plate.Health) and (leftmostAnchor--[[@as RPClassificationFrame]]._cleanWidth or leftmostAnchor:GetWidth()) or 0
         plate.Health.targetArrowL:ClearAllPoints()
         plate.Health.targetArrowL:SetPoint("RIGHT", plate.Health, "LEFT", -xOffset, 0)
     end

@@ -1,9 +1,12 @@
 local _, ns = ...
 local RP = ns.RP ---@type RP
 
+---@class RPRaidMarkerFrame : Frame
+---@field _passiveMode boolean?
+
 ---@class RPPlate
 ---@field RaidMarker Texture?
----@field _raidMarkerFrame Frame?
+---@field _raidMarkerFrame RPRaidMarkerFrame?
 
 ---@class RPRaidMarkerConfig
 ---@field enabled boolean
@@ -34,7 +37,7 @@ RP:WrapHook("ConstructHealth", function(original, plate)
     if not db.enabled then return end
 
     -- Slot frame (anchored by layout system)
-    local frame = CreateFrame("Frame", nil, plate)
+    local frame = CreateFrame("Frame", nil, plate) --[[@as RPRaidMarkerFrame]]
     frame:SetSize(db.iconSize, db.iconSize)
     frame:EnableMouse(false)
     frame:Hide()

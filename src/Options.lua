@@ -36,7 +36,7 @@ local function RefreshAllPlates()
 
     -- Reconstruct all visible nameplates
     for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-        local plate = RP:Call("ConstructPlate", frame)
+        local plate = RP:Call("ConstructPlate", frame) --[[@as RPPlate]]
         NP.plates[frame] = plate
         RP:Call("OnPlateCreated", plate)
 

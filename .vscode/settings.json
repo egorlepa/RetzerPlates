@@ -102,7 +102,8 @@
         "UNITNAME_TITLE_MINION",
         "StaticPopupDialogs",
         "StaticPopup_Show",
-        "UNKNOWNOBJECT"
+        "UNKNOWNOBJECT",
+        "COMBATLOG_OBJECT_REACTION_HOSTILE"
     ],
     "Lua.diagnostics.disable": [
         "assign-type-mismatch"
