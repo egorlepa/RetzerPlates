@@ -5,21 +5,21 @@ local RP = ns.RP ---@type RP
 ---@field targetArrowL Texture?
 ---@field targetArrowR Texture?
 
----@class RPPlate
----@field _targetScale number?
 
 ---@class RPTargetConfig
----@field enabled boolean
+---@field arrowsEnabled boolean
 ---@field arrowSize number
 ---@field arrowColor RPColor
+---@field scaleEnabled boolean
 ---@field scale number
 
 RP:RegisterSchema("target", {
     _meta = { label = "Target" },
-    { key = "enabled",    default = true,                          label = "Enable Target Arrows" },
-    { key = "arrowSize",  default = 80,                            label = "Arrow Size",          min = 20, max = 160, step = 5, scalable = true },
-    { key = "arrowColor", default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
-    { key = "scale",      default = 1.0,                           label = "Target Scale",        min = 1.0, max = 1.5, step = 0.05 },
+    { key = "arrowsEnabled", default = true,                           label = "Enable Target Arrows" },
+    { key = "arrowSize",     default = 80,                             label = "Arrow Size",           min = 20, max = 160, step = 5, scalable = true },
+    { key = "arrowColor",    default = { r = 1.0, g = 1.0, b = 1.0 }, label = "Arrow Color" },
+    { key = "scaleEnabled",  default = true,                           label = "Enable Target Scale" },
+    { key = "scale",         default = 1.15,                           label = "Target Scale",         min = 1.0, max = 1.5, step = 0.05 },
 })
 
 ----------------------------------------------------------------
@@ -81,19 +81,21 @@ end)
 local function UpdateTargetPlate(plate, show)
     if not plate.Health or not plate.Health.targetArrowL then return end
     local db = RP.db.target
-    if not db.enabled or RP.IsPassive(plate) then show = false end
+    if RP.IsPassive(plate) then show = false end
+    local showArrows = show and db.arrowsEnabled
+    local showScale  = show and db.scaleEnabled
 
-    if show then
+    if showArrows then
         plate.Health.targetArrowL:Show()
         plate.Health.targetArrowR:Show()
-        plate._targetScale = (db.scale ~= 1.0) and db.scale or nil
-        if plate._targetScale then
-            RP:Call("ScalePlate", plate, plate._targetScale)
-        end
     else
         plate.Health.targetArrowL:Hide()
         plate.Health.targetArrowR:Hide()
-        plate._targetScale = nil
+    end
+
+    if showScale and db.scale ~= 1.0 then
+        RP:Call("ScalePlate", plate, db.scale)
+    else
         RP:Call("UpdateLayout", plate)
     end
 end
@@ -102,8 +104,9 @@ end
 ---@param plate RPPlate
 RP:WrapHook("UpdateLayout", function(original, plate)
     original(plate)
-    if plate._targetScale then
-        RP:Call("ScalePlate", plate, plate._targetScale)
+    local db = RP.db.target
+    if plate == currentTarget and db.scaleEnabled and not RP.IsPassive(plate) and db.scale ~= 1.0 then
+        RP:Call("ScalePlate", plate, db.scale)
     end
 end)
 
@@ -112,8 +115,9 @@ local function RefreshTarget()
     if not NP then return end
 
     if currentTarget then
-        UpdateTargetPlate(currentTarget, false)
+        local prev = currentTarget
         currentTarget = nil
+        UpdateTargetPlate(prev, false)
     end
 
     local frame = C_NamePlate.GetNamePlateForUnit("target")
@@ -133,8 +137,8 @@ end)
 ---@param plate RPPlate
 RP:WrapHook("OnPlateRemoved", function(original, plate)
     if plate == currentTarget then
-        UpdateTargetPlate(plate, false)
         currentTarget = nil
+        UpdateTargetPlate(plate, false)
     end
     original(plate)
 end)
