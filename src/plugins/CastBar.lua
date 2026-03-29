@@ -269,6 +269,24 @@ end)
 
 ---@param original function
 ---@param plate RPPlate
+RP:WrapHook("UpdateLayout", function(original, plate)
+    original(plate)
+    if not plate.CastBar then return end
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    if isMinorEnemy then
+        local sdb = RP.db.simplified
+        plate.CastBar:SetSize(sdb.enemyWidth, sdb.enemyCastBarHeight)
+        plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, sdb.enemyCastBarFontSize, "OUTLINE")
+        plate.CastBar._iconFrame:Hide()
+    else
+        plate.CastBar:SetSize(RP.db.healthbar.width, RP.db.castbar.height)
+        plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, RP.db.castbar.fontSize, "OUTLINE")
+        plate.CastBar._iconFrame:Show()
+    end
+end)
+
+---@param original function
+---@param plate RPPlate
 ---@param factor number
 RP:WrapHook("ScalePlate", function(original, plate, factor)
     original(plate, factor)

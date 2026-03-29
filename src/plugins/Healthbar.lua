@@ -107,6 +107,37 @@ RP:RegisterHook("UpdateHealthColor", function(plate)
     end
 end)
 
+---@param original function
+---@param plate RPPlate
+RP:WrapHook("UpdateLayout", function(original, plate)
+    original(plate)
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    if RP.IsPassive(plate) then
+        plate.Health.bg:Hide()
+        plate.Health.border:Hide()
+    elseif isMinorEnemy then
+        local sdb = RP.db.simplified
+        plate.Health:SetSize(sdb.enemyWidth, sdb.enemyHeight)
+        plate.Health.bg:Show()
+        plate.Health.border:Show()
+    else
+        plate.Health:SetSize(RP.db.healthbar.width, RP.db.healthbar.height)
+        plate.Health.bg:Show()
+        plate.Health.border:Show()
+    end
+end)
+
+---@param original function
+---@param plate RPPlate
+---@param factor number
+RP:WrapHook("ScalePlate", function(original, plate, factor)
+    original(plate, factor)
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    local w = isMinorEnemy and RP.db.simplified.enemyWidth  or RP.db.healthbar.width
+    local h = isMinorEnemy and RP.db.simplified.enemyHeight or RP.db.healthbar.height
+    plate.Health:SetSize(math.floor(w * factor + 0.5), math.floor(h * factor + 0.5))
+end)
+
 ---@param plate RPPlate
 RP:RegisterHook("GetHealthColor", function(plate)
     local unit = plate.unit

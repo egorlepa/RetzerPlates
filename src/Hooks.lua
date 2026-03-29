@@ -266,33 +266,6 @@ end)
 
 ---@param plate RPPlate
 RP:RegisterHook("UpdateLayout", function(plate)
-    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
-
-    if RP.IsPassive(plate) then
-        plate.Health:SetStatusBarColor(0, 0, 0, 0)
-        plate.Health.bg:Hide()
-        plate.Health.border:Hide()
-    elseif isMinorEnemy then
-        local sdb = RP.db.simplified
-        plate.Health:SetSize(sdb.enemyWidth, sdb.enemyHeight)
-        plate.Health.bg:Show()
-        plate.Health.border:Show()
-        if plate.CastBar then
-            plate.CastBar:SetSize(sdb.enemyWidth, sdb.enemyCastBarHeight)
-            plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, sdb.enemyCastBarFontSize, "OUTLINE")
-            plate.CastBar._iconFrame:Hide()
-        end
-    else
-        plate.Health:SetSize(RP.db.healthbar.width, RP.db.healthbar.height)
-        plate.Health.bg:Show()
-        plate.Health.border:Show()
-        if plate.CastBar then
-            plate.CastBar:SetSize(RP.db.healthbar.width, RP.db.castbar.height)
-            plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, RP.db.castbar.fontSize, "OUTLINE")
-            plate.CastBar._iconFrame:Show()
-        end
-    end
-
     local dbg = plate._hitboxDebug
     if not dbg then return end
     local db = RP.db.general
@@ -312,12 +285,7 @@ end)
 -- Called by whoever sets plate._targetScale (e.g. TargetIndicator).
 ----------------------------------------------------------------
 
-RP:RegisterHook("ScalePlate", function(plate, factor)
-    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
-    local w = isMinorEnemy and RP.db.simplified.enemyWidth  or RP.db.healthbar.width
-    local h = isMinorEnemy and RP.db.simplified.enemyHeight or RP.db.healthbar.height
-    plate.Health:SetSize(math.floor(w * factor + 0.5), math.floor(h * factor + 0.5))
-end)
+RP:RegisterHook("ScalePlate", function() end)
 
 ----------------------------------------------------------------
 -- Lifecycle notifications (default no-ops)
