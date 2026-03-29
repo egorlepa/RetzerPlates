@@ -23,12 +23,12 @@ No build step. Edit files in `src/`, deploy, `/reload` in-game. Open settings in
 3. `Config.lua` — Declarative schema (single source of truth for defaults + options UI). Plugins extend it via `RP:RegisterSchema()`.
 4. `Options.lua` — Settings UI, profile management, minimap button. Auto-generates widgets from schema.
 5. `Utilities.lua` — Shared factories (`RP.CreateIconFrame` for aura/CC icon frames).
-6. `Hooks.lua` — Core hook implementations: plate construction, suppression, classification, layout, lifecycle no-ops.
-7. `plugins/*.lua` — Feature plugins. Each registers its own hooks (`RegisterHook`) and/or wraps existing ones (`WrapHook`). Some plugins (Healthbar, CastBar, Name) own "default" hooks like `ConstructHealth` or `UpdateCastBar`.
+6. `Hooks.lua` — Extension points: plate construction/suppression/classification, `UpdateLayout` (hitbox debug only), `ScalePlate` (no-op), lifecycle no-ops. Core utilities (`IsFriendly`, `IsPassive`, `IsMinor`).
+7. `plugins/*.lua` — Feature plugins. Each owns its full visual logic via `RegisterHook`/`WrapHook`. Healthbar, CastBar, and Name own their sizing and font logic by wrapping `UpdateLayout` and `ScalePlate`.
 8. `Layout.lua` — Right-side slot system and left anchor system for positioning elements beside the health bar.
 9. `Nameplates.lua` — Thin orchestrator. Listens to WoW nameplate events, dispatches to hooks via `RP:Call(...)`. Contains zero logic.
 
-**Key principle**: Nameplates.lua only wires WoW events to hook calls. All behavior lives in Hooks.lua or plugins.
+**Key principle**: Hooks.lua provides extension points (no-ops) and shared utilities — it contains no plugin-specific logic. All visual behavior lives in plugins. Nameplates.lua only wires WoW events to hook calls.
 
 ## Hook System
 
@@ -58,6 +58,7 @@ end)
 - **Cast bar**: `StartCastBarTicker`, `StopCastBar`, `UpdateDebugCastBar`
 - **Layout**: `OnLayoutChanged`, `OnLeftLayoutChanged`, `GetRightAnchor`
 - **Setup**: `SetCVars`, `SetClickSpace`, `SuppressBlizzardPlate`
+- **Scaling**: `ScalePlate(plate, factor)` — no-op default; plugins wrap to scale their own frames/fonts
 
 ## Schema-Driven Config
 
@@ -81,9 +82,17 @@ Saved to `RetzerPlatesDB` via AceDB. Access at runtime via `RP.db.<section>.<key
 - **Right slots**: Ordered chain (raid marker, quest icon, CC, etc.). Plugins register with `RP:RegisterRightSlot(name)`, assign frames with `RP:SetSlotFrame()`, toggle with `RP:SetSlotActive()`. Registration order = TOC load order.
 - **Left anchor**: Single element (cast bar icon). Set with `RP:SetLeftAnchor()`, clear with `RP:ClearLeftAnchor()`.
 
-## Passive Units
+## Passive and Minor Units
 
-`RP.IsPassive(plate)` — true when `not UnitCanAttack("player", unit)`. These get name-only plates (health bar hidden). Covers friendly NPCs and neutral non-attackable NPCs.
+- `RP.IsPassive(plate)` — true when `not UnitCanAttack("player", unit)`. These get name-only plates (health bar hidden).
+- `RP.IsMinor(unit)` — true for pets, totems, minions, guardians, and "minus"-classified mobs. Simplified plates are shown when `RP.db.simplified.enabled`.
+
+## Pixel-Perfect Scaling
+
+Two separate mechanisms — do not confuse them:
+
+- **`RescaleProfile()`** (`Config.lua`) — run once on load; bakes resolution-appropriate integer values into `RP.db` for all schema entries marked `scalable = true`. Factor is `(768/1440) / UIParent:GetEffectiveScale()`.
+- **`ScalePlate(plate, factor)`** — per-plate runtime override (e.g. target emphasis). Each plugin wraps this hook to scale its own frames. Never use `:SetScale()` on plates — fractional frame scaling breaks 1-pixel borders and shared-border offsets.
 
 ## Midnight / Secret Values
 
