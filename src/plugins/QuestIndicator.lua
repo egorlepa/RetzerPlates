@@ -57,7 +57,8 @@ local function GetQuestObjectives(unit)
                 if pct and tonumber(pct) < 100 then
                     return pct .. "%"
                 end
-                return nil
+                -- No n/m or n% pattern — still an incomplete objective
+                return ""
             end)
             if ok and result then
                 objectives[#objectives + 1] = result
