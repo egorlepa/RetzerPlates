@@ -307,6 +307,19 @@ RP:RegisterHook("UpdateLayout", function(plate)
 end)
 
 ----------------------------------------------------------------
+-- Plate scaling (e.g. target emphasis)
+-- Plugins wrap this to scale their own frames/fonts.
+-- Called by whoever sets plate._targetScale (e.g. TargetIndicator).
+----------------------------------------------------------------
+
+RP:RegisterHook("ScalePlate", function(plate, factor)
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    local w = isMinorEnemy and RP.db.simplified.enemyWidth  or RP.db.healthbar.width
+    local h = isMinorEnemy and RP.db.simplified.enemyHeight or RP.db.healthbar.height
+    plate.Health:SetSize(math.floor(w * factor + 0.5), math.floor(h * factor + 0.5))
+end)
+
+----------------------------------------------------------------
 -- Lifecycle notifications (default no-ops)
 ----------------------------------------------------------------
 

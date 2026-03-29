@@ -5,6 +5,9 @@ local RP = ns.RP ---@type RP
 ---@field targetArrowL Texture?
 ---@field targetArrowR Texture?
 
+---@class RPPlate
+---@field _targetScale number?
+
 ---@class RPTargetConfig
 ---@field enabled boolean
 ---@field arrowSize number
@@ -75,7 +78,7 @@ RP:WrapHook("OnLeftLayoutChanged", function(original, plate, leftmostAnchor)
     end
 end)
 
-local function ShowArrows(plate, show)
+local function UpdateTargetPlate(plate, show)
     if not plate.Health or not plate.Health.targetArrowL then return end
     local db = RP.db.target
     if not db.enabled or RP.IsPassive(plate) then show = false end
@@ -83,13 +86,15 @@ local function ShowArrows(plate, show)
     if show then
         plate.Health.targetArrowL:Show()
         plate.Health.targetArrowR:Show()
-        if db.scale ~= 1.0 then
-            plate:SetScale(db.scale)
+        plate._targetScale = (db.scale ~= 1.0) and db.scale or nil
+        if plate._targetScale then
+            RP:Call("ScalePlate", plate, plate._targetScale)
         end
     else
         plate.Health.targetArrowL:Hide()
         plate.Health.targetArrowR:Hide()
-        plate:SetScale(1)
+        plate._targetScale = nil
+        RP:Call("UpdateLayout", plate)
     end
 end
 
@@ -97,8 +102,8 @@ end
 ---@param plate RPPlate
 RP:WrapHook("UpdateLayout", function(original, plate)
     original(plate)
-    if plate == currentTarget then
-        ShowArrows(plate, true) -- ShowArrows internally checks IsPassive
+    if plate._targetScale then
+        RP:Call("ScalePlate", plate, plate._targetScale)
     end
 end)
 
@@ -107,7 +112,7 @@ local function RefreshTarget()
     if not NP then return end
 
     if currentTarget then
-        ShowArrows(currentTarget, false)
+        UpdateTargetPlate(currentTarget, false)
         currentTarget = nil
     end
 
@@ -117,7 +122,7 @@ local function RefreshTarget()
     if not plate then return end
 
     currentTarget = plate
-    ShowArrows(plate, true)
+    UpdateTargetPlate(plate, true)
 end
 
 RP:RegisterEvent("PLAYER_TARGET_CHANGED", function()
@@ -128,7 +133,7 @@ end)
 ---@param plate RPPlate
 RP:WrapHook("OnPlateRemoved", function(original, plate)
     if plate == currentTarget then
-        ShowArrows(plate, false)
+        UpdateTargetPlate(plate, false)
         currentTarget = nil
     end
     original(plate)
@@ -140,6 +145,6 @@ RP:WrapHook("OnPlateAdded", function(original, plate)
     original(plate)
     if plate.unit and UnitIsUnit(plate.unit, "target") then
         currentTarget = plate
-        ShowArrows(plate, true)
+        UpdateTargetPlate(plate, true)
     end
 end)

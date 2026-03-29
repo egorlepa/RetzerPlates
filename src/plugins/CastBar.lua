@@ -267,6 +267,25 @@ RP:RegisterHook("StartCastBarTicker", function(plate)
     end
 end)
 
+---@param original function
+---@param plate RPPlate
+---@param factor number
+RP:WrapHook("ScalePlate", function(original, plate, factor)
+    original(plate, factor)
+    if not plate.CastBar then return end
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    local baseW  = isMinorEnemy and RP.db.simplified.enemyWidth          or RP.db.healthbar.width
+    local baseHH = isMinorEnemy and RP.db.simplified.enemyHeight         or RP.db.healthbar.height
+    local baseCH = isMinorEnemy and RP.db.simplified.enemyCastBarHeight  or RP.db.castbar.height
+    local baseFs = isMinorEnemy and RP.db.simplified.enemyCastBarFontSize or RP.db.castbar.fontSize
+    local w  = math.floor(baseW  * factor + 0.5)
+    local hh = math.floor(baseHH * factor + 0.5)
+    local ch = math.floor(baseCH * factor + 0.5)
+    plate.CastBar:SetSize(w, ch)
+    plate.CastBar._iconFrame:SetSize(hh + ch - 1, hh + ch - 1)
+    plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, math.floor(baseFs * factor + 0.5), "OUTLINE")
+end)
+
 ---@param plate RPPlate
 ---@param reason string?
 ---@param interruptedBy string?

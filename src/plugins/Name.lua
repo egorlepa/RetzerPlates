@@ -78,6 +78,17 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     end
 end)
 
+---@param original function
+---@param plate RPPlate
+---@param factor number
+RP:WrapHook("ScalePlate", function(original, plate, factor)
+    original(plate, factor)
+    if not plate.Name then return end
+    local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
+    local baseFs = isMinorEnemy and RP.db.simplified.enemyFontSize or RP.db.name.fontSize
+    plate.Name:SetFont(STANDARD_TEXT_FONT, math.floor(baseFs * factor + 0.5), "OUTLINE")
+end)
+
 ----------------------------------------------------------------
 -- Color
 ----------------------------------------------------------------
