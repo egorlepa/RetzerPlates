@@ -144,20 +144,20 @@ local function CreateMark(plate, db)
     return mark
 end
 
-local function PositionMark(mark, health, barWidth, threshold)
+local function PositionMark(mark, health, threshold)
     mark:ClearAllPoints()
     mark:SetPoint("TOP", health, "TOP", 0, 0)
     mark:SetPoint("BOTTOM", health, "BOTTOM", 0, 0)
-    mark:SetPoint("LEFT", health, "LEFT", barWidth * threshold, 0)
+    mark:SetPoint("LEFT", health, "LEFT", health:GetWidth() * threshold, 0)
 end
 
-local function EnsureMark(plate, db, barWidth)
+local function EnsureMark(plate, db)
     -- Lower mark
     if lowThreshold then
         if not plate.Health.executeMark then
             plate.Health.executeMark = CreateMark(plate, db)
         end
-        PositionMark(plate.Health.executeMark, plate.Health, barWidth, lowThreshold)
+        PositionMark(plate.Health.executeMark, plate.Health, lowThreshold)
     elseif plate.Health.executeMark then
         plate.Health.executeMark:Hide()
     end
@@ -167,7 +167,7 @@ local function EnsureMark(plate, db, barWidth)
         if not plate.Health.executeMarkUpper then
             plate.Health.executeMarkUpper = CreateMark(plate, db)
         end
-        PositionMark(plate.Health.executeMarkUpper, plate.Health, barWidth, highThreshold)
+        PositionMark(plate.Health.executeMarkUpper, plate.Health, highThreshold)
     elseif plate.Health.executeMarkUpper then
         plate.Health.executeMarkUpper:Hide()
     end
@@ -189,9 +189,8 @@ local function RefreshThresholds()
     -- Update marks on all existing plates (create, reposition, or hide)
     local NP = RP:GetModule("Nameplates")
     if NP then
-        local barWidth = RP.db.healthbar.width
         for _, plate in pairs(NP.plates) do
-            EnsureMark(plate, db, barWidth)
+            EnsureMark(plate, db)
         end
     end
 end
@@ -218,8 +217,22 @@ RP:WrapHook("ConstructHealth", function(original, plate)
     -- Lazy init thresholds (db not available at file load)
     if not thresholdDetected then RefreshThresholds() end
 
-    local barWidth = RP.db.healthbar.width
-    EnsureMark(plate, db, barWidth)
+    EnsureMark(plate, db)
+end)
+
+----------------------------------------------------------------
+-- Scaling: reposition marks to match scaled bar width
+----------------------------------------------------------------
+
+---@param original function
+---@param plate RPPlate
+---@param factor number
+RP:WrapHook("ScalePlate", function(original, plate, factor)
+    original(plate, factor)
+    if not plate.Health then return end
+    local db = RP.db.execute
+    if not db.enabled then return end
+    EnsureMark(plate, db)
 end)
 
 ----------------------------------------------------------------
@@ -231,9 +244,13 @@ end)
 RP:WrapHook("UpdateLayout", function(original, plate)
     original(plate)
 
+    local db = RP.db.execute
+    if not db.enabled then return end
     if RP.IsPassive(plate) or (plate.isMinor and RP.db.simplified.enabled) then
         if plate.Health.executeMark then plate.Health.executeMark:Hide() end
         if plate.Health.executeMarkUpper then plate.Health.executeMarkUpper:Hide() end
+    else
+        EnsureMark(plate, db)
     end
 end)
 
