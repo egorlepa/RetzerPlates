@@ -56,7 +56,7 @@ RP:WrapHook("ConstructHealth", function(original, plate)
     hooksecurefunc(plate.Health, "SetWidth", function(_, w)
         bar:SetWidth(w)
     end)
-    hooksecurefunc(plate.Health, "SetSize", function(_, _, w)
+    hooksecurefunc(plate.Health, "SetSize", function(_, w)
         bar:SetWidth(w)
     end)
 
@@ -105,8 +105,8 @@ local function UpdateAbsorb(plate)
     plate.Health:SetMinMaxValues(0, maxWithAbsorb)
     plate.Health:SetValue(health)
 
-    -- Get absorb amount (clamped to missing health)
-    calc:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals)
+    -- Get absorb amount (clamped to max health, not missing health)
+    calc:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth)
     local absorb = calc:GetDamageAbsorbs()
 
     -- Absorb bar fills proportionally from health fill right edge
