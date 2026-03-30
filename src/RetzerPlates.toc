@@ -10,6 +10,7 @@
 ## X-Wago-ID: nGv7ReNx
 
 libs\LibStub.lua
+libs\RetzerUI-1.0.lua
 libs\CallbackHandler-1.0.lua
 libs\AceDB-3.0.lua
 libs\LibDataBroker-1.1.lua
