@@ -139,7 +139,7 @@ RP:WrapHook("UpdatePlate", function(original, plate)
     -- Detect quest status BEFORE original so GetHealthColor has the flag
     local db = RP.db.quest
     local unit = plate.unit
-    if db and db.enabled and unit and not (plate.isMinor and RP.db.simplified.enabled) then
+    if db and db.enabled and unit then
         if db.debug then
             plate.questObjectives = { "3/5", "10%" }
         else
