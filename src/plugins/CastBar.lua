@@ -74,7 +74,7 @@ RP:RegisterHook("ConstructCastBar", function(plate)
     icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
     local text = bar:CreateFontString(nil, "OVERLAY")
-    text:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    text:SetFont(RP.GetTextFont(), db.fontSize, "OUTLINE")
     text:SetPoint("LEFT", bar, "LEFT", 4, 0)
 
     local border = CreateFrame("Frame", nil, bar)
@@ -276,11 +276,11 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     if isMinorEnemy then
         local sdb = RP.db.simplified
         plate.CastBar:SetSize(sdb.enemyWidth, sdb.enemyCastBarHeight)
-        plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, sdb.enemyCastBarFontSize, "OUTLINE")
+        plate.CastBar.Text:SetFont(RP.GetTextFont(), sdb.enemyCastBarFontSize, "OUTLINE")
         plate.CastBar._iconFrame:Hide()
     else
         plate.CastBar:SetSize(RP.db.healthbar.width, RP.db.castbar.height)
-        plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, RP.db.castbar.fontSize, "OUTLINE")
+        plate.CastBar.Text:SetFont(RP.GetTextFont(), RP.db.castbar.fontSize, "OUTLINE")
         plate.CastBar._iconFrame:Show()
     end
 end)
@@ -301,7 +301,7 @@ RP:WrapHook("ScalePlate", function(original, plate, factor)
     local ch = math.floor(baseCH * factor + 0.5)
     plate.CastBar:SetSize(w, ch)
     plate.CastBar._iconFrame:SetSize(hh + ch - 1, hh + ch - 1)
-    plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, math.floor(baseFs * factor + 0.5), "OUTLINE")
+    plate.CastBar.Text:SetFont(RP.GetTextFont(), math.floor(baseFs * factor + 0.5), "OUTLINE")
 end)
 
 ---@param plate RPPlate

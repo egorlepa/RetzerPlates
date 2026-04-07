@@ -9,6 +9,8 @@ local RP = ns.RP ---@type RP
 
 ---@class RPGeneralConfig
 ---@field enabled boolean
+---@field font string
+---@field numberFont string
 ---@field hitboxWidth number
 ---@field hitboxHeight number
 ---@field yOffset number
@@ -69,6 +71,9 @@ RP.schema = {
         { key = "overlapV",          default = 1.4,   label = "Vertical Overlap",    min = 0.2,    max = 3.0, step = 0.1 },
         { key = "stackEnemies",      default = true,  label = "Stack Enemies" },
         { key = "stackFriendlies",   default = false, label = "Stack Friendlies" },
+        { header = "Fonts" },
+        { key = "font",       default = "PT Sans Narrow", label = "Text Font",   lsm = "font" },
+        { key = "numberFont", default = "PT Sans Narrow", label = "Number Font", lsm = "font" },
     },
     visibility = {
         _meta = { label = "Visibility", order = 2 },
@@ -151,6 +156,20 @@ function RP.RescaleProfile()
             end
         end
     end
+end
+
+----------------------------------------------------------------
+-- Font accessors (via LibSharedMedia)
+----------------------------------------------------------------
+
+local LSM = LibStub("LibSharedMedia-3.0")
+
+function RP.GetTextFont()
+    return LSM:Fetch("font", RP.db.general.font) or STANDARD_TEXT_FONT
+end
+
+function RP.GetNumberFont()
+    return LSM:Fetch("font", RP.db.general.numberFont) or STANDARD_TEXT_FONT
 end
 
 ----------------------------------------------------------------

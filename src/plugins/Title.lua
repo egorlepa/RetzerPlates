@@ -71,7 +71,7 @@ RP:WrapHook("ConstructName", function(original, plate)
     if not plate.Name then return end
 
     local text = plate.Health:CreateFontString(nil, "OVERLAY")
-    text:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    text:SetFont(RP.GetTextFont(), db.fontSize, "OUTLINE")
     text:SetTextColor(0.7, 0.7, 0.7)
     text:SetPoint("TOPLEFT", plate.Name, "BOTTOMLEFT", 0, -1)
     plate.Title = text
@@ -120,10 +120,10 @@ RP:WrapHook("UpdateLayout", function(original, plate)
 
     if RP.IsPassive(plate) then
         local fontSize = isSimplified and sdb.passiveTitleFontSize or db.fontSize
-        plate.Title:SetFont(STANDARD_TEXT_FONT, fontSize, "OUTLINE")
+        plate.Title:SetFont(RP.GetTextFont(), fontSize, "OUTLINE")
         plate.Title:SetPoint("TOP", plate.Name, "BOTTOM", 0, -1)
     else
-        plate.Title:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+        plate.Title:SetFont(RP.GetTextFont(), db.fontSize, "OUTLINE")
         plate.Title:SetPoint("TOPLEFT", plate.Name, "BOTTOMLEFT", 0, -1)
     end
 end)

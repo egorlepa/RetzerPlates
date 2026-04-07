@@ -2,7 +2,7 @@
 -- Shared settings-UI widget library for Retzer addons.
 -- Usage: local RUI = LibStub("RetzerUI-1.0")
 
-local LIB_NAME, LIB_VERSION = "RetzerUI-1.0", 1
+local LIB_NAME, LIB_VERSION = "RetzerUI-1.0", 10
 local RUI, oldVersion = LibStub:NewLibrary(LIB_NAME, LIB_VERSION)
 if not RUI then return end
 
@@ -101,9 +101,111 @@ function RUI.EditBox(parent, width)
 end
 
 ----------------------------------------------------------------
--- Public: Dropdown
--- Returns container with .Refresh(newChoices, newCurrent) and .GetValue()
+-- Private: scrollbar factory
+-- Creates a draggable scrollbar attached to a ScrollFrame.
+-- Returns sbTrack (caller positions it) and an Update function.
 ----------------------------------------------------------------
+
+local SB_W = 6
+
+local function MakeScrollbar(scrollFrame, sbParent, wheelStep)
+    local sbTrack = CreateFrame("Frame", nil, sbParent)
+    sbTrack:SetWidth(SB_W)
+    sbTrack:EnableMouse(true)
+    local sbTrackBg = sbTrack:CreateTexture(nil, "BACKGROUND")
+    sbTrackBg:SetAllPoints()
+    sbTrackBg:SetColorTexture(0.2, 0.2, 0.2, 1)
+
+    local sbThumb = CreateFrame("Frame", nil, sbTrack)
+    sbThumb:SetWidth(SB_W)
+    sbThumb:EnableMouse(true)
+    local sbThumbTex = sbThumb:CreateTexture(nil, "OVERLAY")
+    sbThumbTex:SetAllPoints()
+    sbThumbTex:SetColorTexture(0.55, 0.55, 0.55, 1)
+
+    local function Update()
+        local trackH = sbTrack:GetHeight()
+        local contentH = scrollFrame:GetScrollChild():GetHeight()
+        if contentH <= trackH or trackH == 0 then
+            sbTrack:Hide()
+            return
+        end
+        sbTrack:Show()
+        local thumbH = math.max(16, trackH * (trackH / contentH))
+        local maxScroll = contentH - trackH
+        local scroll = math.min(scrollFrame:GetVerticalScroll(), maxScroll)
+        local offset = (maxScroll > 0) and (scroll / maxScroll * (trackH - thumbH)) or 0
+        sbThumb:SetHeight(thumbH)
+        sbThumb:ClearAllPoints()
+        sbThumb:SetPoint("TOP", sbTrack, "TOP", 0, -offset)
+    end
+
+    -- Drag thumb
+    local dragging, dragStartY, dragStartScroll = false, 0, 0
+    sbThumb:SetScript("OnMouseDown", function(_, button)
+        if button ~= "LeftButton" then return end
+        dragging = true
+        dragStartY = select(2, GetCursorPosition()) / UIParent:GetEffectiveScale()
+        dragStartScroll = scrollFrame:GetVerticalScroll()
+    end)
+    sbThumb:SetScript("OnMouseUp", function() dragging = false end)
+    sbThumb:SetScript("OnUpdate", function()
+        if not dragging then return end
+        local curY = select(2, GetCursorPosition()) / UIParent:GetEffectiveScale()
+        local sr = sbTrack:GetHeight() - sbThumb:GetHeight()
+        if sr <= 0 then return end
+        local newScroll = dragStartScroll + ((dragStartY - curY) / sr) * scrollFrame:GetVerticalScrollRange()
+        scrollFrame:SetVerticalScroll(math.max(0, math.min(scrollFrame:GetVerticalScrollRange(), newScroll)))
+        Update()
+    end)
+
+    -- Click on track jumps to position
+    local thumbPressed = false
+    sbThumb:HookScript("OnMouseDown", function() thumbPressed = true end)
+    sbThumb:HookScript("OnMouseUp",   function() thumbPressed = false end)
+    sbTrack:SetScript("OnMouseDown", function(_, button)
+        if thumbPressed or button ~= "LeftButton" then return end
+        local trackH = sbTrack:GetHeight()
+        local thumbH = sbThumb:GetHeight()
+        local maxOffset = trackH - thumbH
+        if maxOffset <= 0 then return end
+        local relY = sbTrack:GetTop() - select(2, GetCursorPosition()) / UIParent:GetEffectiveScale()
+        local pct = math.max(0, math.min(1, (relY - thumbH / 2) / maxOffset))
+        scrollFrame:SetVerticalScroll(pct * scrollFrame:GetVerticalScrollRange())
+        Update()
+    end)
+
+    -- Mousewheel
+    scrollFrame:EnableMouseWheel(true)
+    scrollFrame:SetScript("OnMouseWheel", function(self, delta)
+        local cur = self:GetVerticalScroll()
+        local max = self:GetVerticalScrollRange()
+        self:SetVerticalScroll(math.max(0, math.min(max, cur - delta * (wheelStep or 20))))
+        Update()
+    end)
+
+    return sbTrack, Update
+end
+
+----------------------------------------------------------------
+-- Public: Dropdown
+-- Returns container with .Refresh(newChoices, newCurrent), .GetValue(), .Close()
+----------------------------------------------------------------
+
+local closeOpenDropdown = nil  -- at most one dropdown open at a time
+
+-- Transparent fullscreen catch frame: closes the open dropdown on outside click
+local catchFrame = CreateFrame("Frame", nil, UIParent)
+catchFrame:SetAllPoints(UIParent)
+catchFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+catchFrame:EnableMouse(true)
+catchFrame:Hide()
+catchFrame:SetScript("OnMouseDown", function()
+    if closeOpenDropdown then closeOpenDropdown() end
+end)
+
+local DROPDOWN_MAX_H = 200
+local DROPDOWN_ITEM_H = 22
 
 function RUI.Dropdown(parent, width, choices, current, onChange)
     local container = CreateFrame("Frame", nil, parent)
@@ -130,31 +232,51 @@ function RUI.Dropdown(parent, width, choices, current, onChange)
     arrow:SetText("v")
     arrow:SetPoint("RIGHT", -6, 0)
 
-    local menu = CreateFrame("Frame", nil, btn, "BackdropTemplate")
+    -- Menu parented to UIParent so it escapes scroll frame clipping
+    local menu = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     menu:SetBackdrop(BACKDROP_SOLID)
     menu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
     menu:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
-    menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -1)
     menu:SetFrameStrata("TOOLTIP")
+    menu:SetWidth(width)
     menu:Hide()
 
-    local function Refresh(newChoices, newCurrent)
-        choices = newChoices or choices
-        current = newCurrent or current
-        btnText:SetText(current or "")
+    local SB_GAP = 2
 
-        for _, child in pairs({ menu:GetChildren() }) do
+    local scrollFrame = CreateFrame("ScrollFrame", nil, menu)
+    scrollFrame:SetPoint("TOPLEFT", 2, -2)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -(2 + SB_GAP + SB_W), 2)
+
+    local scrollChild = CreateFrame("Frame", nil, scrollFrame)
+    scrollChild:SetWidth(width - 4 - SB_GAP - SB_W)
+    scrollFrame:SetScrollChild(scrollChild)
+
+    local sbTrack, UpdateScrollbar = MakeScrollbar(scrollFrame, menu, DROPDOWN_ITEM_H)
+    sbTrack:SetPoint("TOPRIGHT", menu, "TOPRIGHT", -2, -2)
+    sbTrack:SetPoint("BOTTOMRIGHT", menu, "BOTTOMRIGHT", -2, 2)
+
+    local function CloseMenu()
+        menu:Hide()
+        if closeOpenDropdown == CloseMenu then
+            closeOpenDropdown = nil
+            catchFrame:Hide()
+        end
+    end
+
+    local function BuildItems()
+        for _, child in pairs({ scrollChild:GetChildren() }) do
             child:Hide()
             child:SetParent(nil)
         end
 
-        local itemH = 22
-        menu:SetSize(width, #choices * itemH + 4)
+        local totalContentH = #choices * DROPDOWN_ITEM_H
+        scrollChild:SetHeight(math.max(totalContentH, 1))
+        menu:SetHeight(math.min(totalContentH + 4, DROPDOWN_MAX_H))
 
         for i, choice in ipairs(choices) do
-            local item = CreateFrame("Button", nil, menu)
-            item:SetSize(width - 4, itemH)
-            item:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, -2 - (i - 1) * itemH)
+            local item = CreateFrame("Button", nil, scrollChild)
+            item:SetSize(scrollChild:GetWidth(), DROPDOWN_ITEM_H)
+            item:SetPoint("TOPLEFT", 0, -(i - 1) * DROPDOWN_ITEM_H)
 
             local itemHL = item:CreateTexture(nil, "BACKGROUND")
             itemHL:SetAllPoints()
@@ -171,27 +293,51 @@ function RUI.Dropdown(parent, width, choices, current, onChange)
             item:SetScript("OnClick", function()
                 current = choice
                 btnText:SetText(choice)
-                menu:Hide()
+                CloseMenu()
                 if onChange then onChange(choice) end
             end)
         end
+        UpdateScrollbar()
     end
 
-    Refresh(choices, current)
+    local function Refresh(newChoices, newCurrent)
+        if newChoices then choices = newChoices end
+        if newCurrent then
+            current = newCurrent
+            btnText:SetText(current)
+        end
+        BuildItems()
+    end
+
+    BuildItems()
 
     btn:SetScript("OnClick", function()
         if menu:IsShown() then
-            menu:Hide()
+            CloseMenu()
         else
-            Refresh(choices, current)
+            if closeOpenDropdown then closeOpenDropdown() end
+            closeOpenDropdown = CloseMenu
+            catchFrame:Show()
+            scrollFrame:SetVerticalScroll(0)
+            menu:ClearAllPoints()
+            menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -1)
             menu:Show()
+            UpdateScrollbar()
+            local anchorLeft, anchorTop = btn:GetLeft(), btn:GetTop()
+            menu:SetScript("OnUpdate", function()
+                if btn:GetLeft() ~= anchorLeft or btn:GetTop() ~= anchorTop then
+                    CloseMenu()
+                end
+            end)
         end
     end)
     btn:SetScript("OnEnter", function(self) self:SetBackdropColor(0.2, 0.2, 0.2, 1) end)
     btn:SetScript("OnLeave", function(self) self:SetBackdropColor(0.15, 0.15, 0.15, 1) end)
+    btn:HookScript("OnHide", CloseMenu)
 
     container.Refresh = Refresh
     container.GetValue = function() return current end
+    container.Close = CloseMenu
     return container
 end
 
@@ -388,6 +534,34 @@ local function MakeDropdownWidget(parent, sectionKey, key, def, yOffset, db, onC
     return WIDGET_H
 end
 
+-- Schema entry with lsm = "<mediatype>" renders as a dropdown populated from LibSharedMedia.
+-- e.g. lsm = "font", lsm = "statusbar", lsm = "sound"
+local function MakeLSMWidget(parent, sectionKey, key, def, yOffset, db, onChanged)
+    local LSM = LibStub("LibSharedMedia-3.0", true)
+    if not LSM then return 0 end
+    local items = LSM:List(def.lsm) or {}
+
+    local row = CreateFrame("Frame", nil, parent)
+    row:SetSize(LABEL_W + 160, WIDGET_H)
+    row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, yOffset)
+
+    local labelFs = row:CreateFontString(nil, "OVERLAY")
+    labelFs:SetFont(STANDARD_TEXT_FONT, 12, "")
+    labelFs:SetTextColor(1, 1, 1)
+    labelFs:SetText(def.label)
+    labelFs:SetPoint("LEFT", row, "LEFT", 0, 0)
+    labelFs:SetWidth(LABEL_W)
+    labelFs:SetJustifyH("LEFT")
+
+    local dd = RUI.Dropdown(row, 150, items, db[sectionKey][key], function(choice)
+        db[sectionKey][key] = choice
+        if onChanged then onChanged() end
+    end)
+    dd:SetPoint("LEFT", row, "LEFT", LABEL_W, 0)
+
+    return WIDGET_H
+end
+
 local function MakeWidget(parent, sectionKey, key, def, yOffset, db, onChanged)
     local d = def.default
     if type(d) == "boolean" then
@@ -396,6 +570,8 @@ local function MakeWidget(parent, sectionKey, key, def, yOffset, db, onChanged)
         return MakeSlider(parent, sectionKey, key, def, yOffset, db, onChanged)
     elseif type(d) == "table" and d.r ~= nil then
         return MakeColorPicker(parent, sectionKey, key, def, yOffset, db, onChanged)
+    elseif type(d) == "string" and def.lsm then
+        return MakeLSMWidget(parent, sectionKey, key, def, yOffset, db, onChanged)
     elseif type(d) == "string" and def.choices then
         return MakeDropdownWidget(parent, sectionKey, key, def, yOffset, db, onChanged)
     end
@@ -541,13 +717,18 @@ function RUI:BuildOptionsFrame(opts)
     tabPanel:SetBackdropColor(0.12, 0.12, 0.12, 1)
     tabPanel:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
+    local scrollFrame = CreateFrame("ScrollFrame", nil, frame)
     scrollFrame:SetPoint("TOPLEFT", tabPanel, "TOPRIGHT", 8, -CONTENT_PAD)
-    scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -28, 8 + CONTENT_PAD)
+    scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(8 + SB_W + 4), 8 + CONTENT_PAD)
 
     local scrollChild = CreateFrame("Frame")
     scrollFrame:SetScrollChild(scrollChild)
     scrollChild:SetWidth(frameW - TAB_W - 56)
+
+    local sbTrack, updateScrollbar = MakeScrollbar(scrollFrame, frame, 20)
+    sbTrack:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 4, 0)
+    sbTrack:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 4, 0)
+    scrollChild:SetScript("OnSizeChanged", updateScrollbar)
 
     local tabScroll = CreateFrame("ScrollFrame", nil, tabPanel)
     tabScroll:SetPoint("TOPLEFT", 0, 0)
@@ -597,6 +778,8 @@ function RUI:BuildOptionsFrame(opts)
         selectedTab = index
         tabButtons[index].highlight:SetColorTexture(1, 1, 1, 0.1)
         tabButtons[index].text:SetTextColor(1, 1, 1)
+
+        scrollFrame:SetVerticalScroll(0)
 
         local sec = sections[index]
         if sec.populate then

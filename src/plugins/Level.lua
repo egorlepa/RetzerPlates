@@ -31,7 +31,7 @@ RP:WrapHook("ConstructName", function(original, plate)
     if not db.enabled then return end
 
     local text = plate.Health:CreateFontString(nil, "OVERLAY")
-    text:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    text:SetFont(RP.GetNumberFont(), db.fontSize, "OUTLINE")
     text:SetPoint("BOTTOMRIGHT", plate.Health, "TOPRIGHT", 0, 2)
     plate.Level = text
 end)
@@ -100,6 +100,6 @@ RP:WrapHook("UpdateLayout", function(original, plate)
         return
     end
 
-    plate.Level:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    plate.Level:SetFont(RP.GetNumberFont(), db.fontSize, "OUTLINE")
     plate.Level:SetPoint("BOTTOMRIGHT", plate.Health, "TOPRIGHT", 0, 2)
 end)

@@ -26,7 +26,7 @@ RP:RegisterHook("ConstructName", function(plate)
     if not db.enabled then return end
 
     local text = plate.Health:CreateFontString(nil, "OVERLAY")
-    text:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    text:SetFont(RP.GetTextFont(), db.fontSize, "OUTLINE")
     text:SetPoint("BOTTOMLEFT", plate.Health, "TOPLEFT", 0, 2)
     plate.Name = text
 end)
@@ -67,12 +67,12 @@ RP:WrapHook("UpdateLayout", function(original, plate)
 
     if RP.IsPassive(plate) then
         local fontSize = isSimplified and sdb.passiveFontSize or db.friendlyFontSize
-        plate.Name:SetFont(STANDARD_TEXT_FONT, fontSize, "OUTLINE")
+        plate.Name:SetFont(RP.GetTextFont(), fontSize, "OUTLINE")
         plate.Name:ClearAllPoints()
         plate.Name:SetPoint("CENTER", plate.Health, "CENTER", 0, 0)
     else
         local fontSize = isSimplified and sdb.enemyFontSize or db.fontSize
-        plate.Name:SetFont(STANDARD_TEXT_FONT, fontSize, "OUTLINE")
+        plate.Name:SetFont(RP.GetTextFont(), fontSize, "OUTLINE")
         plate.Name:ClearAllPoints()
         plate.Name:SetPoint("BOTTOMLEFT", plate.Health, "TOPLEFT", 0, 2)
     end
@@ -86,7 +86,7 @@ RP:WrapHook("ScalePlate", function(original, plate, factor)
     if not plate.Name then return end
     local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
     local baseFs = isMinorEnemy and RP.db.simplified.enemyFontSize or RP.db.name.fontSize
-    plate.Name:SetFont(STANDARD_TEXT_FONT, math.floor(baseFs * factor + 0.5), "OUTLINE")
+    plate.Name:SetFont(RP.GetTextFont(), math.floor(baseFs * factor + 0.5), "OUTLINE")
 end)
 
 ----------------------------------------------------------------

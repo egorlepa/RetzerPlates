@@ -48,7 +48,7 @@ function RP.CreateIconFrame(parent, db)
     local timerRegion = cooldown:GetRegions()
     if timerRegion and timerRegion:IsObjectType("FontString") then
         ---@cast timerRegion FontString
-        timerRegion:SetFont(STANDARD_TEXT_FONT, db.durationFontSize, "OUTLINE")
+        timerRegion:SetFont(RP.GetNumberFont(), db.durationFontSize, "OUTLINE")
     end
     frame.Cooldown = cooldown
 
@@ -56,7 +56,7 @@ function RP.CreateIconFrame(parent, db)
     stackFrame:SetAllPoints()
     stackFrame:SetFrameLevel(cooldown:GetFrameLevel() + 2)
     local stack = stackFrame:CreateFontString(nil, "OVERLAY")
-    stack:SetFont(STANDARD_TEXT_FONT, db.stackFontSize, "OUTLINE")
+    stack:SetFont(RP.GetNumberFont(), db.stackFontSize, "OUTLINE")
     stack:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 2, -2)
     stack:SetJustifyH("RIGHT")
     stack:Hide()

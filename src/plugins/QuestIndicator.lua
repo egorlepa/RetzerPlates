@@ -102,7 +102,7 @@ local function EnsureQuestIcon(plate, index)
     icon:SetAtlas("QuestNormal")
 
     local progress = container:CreateFontString(nil, "OVERLAY")
-    progress:SetFont(STANDARD_TEXT_FONT, db.fontSize, "OUTLINE")
+    progress:SetFont(RP.GetNumberFont(), db.fontSize, "OUTLINE")
     progress:SetPoint("TOP", iconFrame, "BOTTOM", 1, -1)
     progress:SetJustifyH("CENTER")
     progress:SetTextColor(1, 0.82, 0)

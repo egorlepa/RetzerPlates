@@ -47,6 +47,8 @@ local ADDON_NAME, ns = ...
 ---@field defaults table<string, table>
 ---@field aceDB table
 ---@field ExtractDefaults fun(schema: table): table
+---@field GetTextFont fun(): string
+---@field GetNumberFont fun(): string
 ---@field RefreshAllPlates fun()?
 ---@field version string
 ---@field IsFriendly fun(frameType: RPFrameType): boolean
