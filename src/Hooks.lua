@@ -137,8 +137,14 @@ function RP.IsFriendly(frameType)
     return frameType == "FRIENDLY_NPC" or frameType == "FRIENDLY_PLAYER"
 end
 
+-- UnitCanAttack returns a secret/tainted boolean in Midnight. `not <secret>` is
+-- unreliable, so resolve through EvaluateColorValueFromBoolean to get a concrete
+-- number we can compare. Without this, passive↔attackable transitions
+-- (PvP flag flips, charm/MC, faction changes) often fail to update.
 function RP.IsPassive(plate)
-    return plate.unit ~= nil and not UnitCanAttack("player", plate.unit)
+    if plate.unit == nil then return false end
+    local canAttack = UnitCanAttack("player", plate.unit)
+    return C_CurveUtil.EvaluateColorValueFromBoolean(canAttack, 1, 0) == 0
 end
 
 function RP.IsMinor(unit)

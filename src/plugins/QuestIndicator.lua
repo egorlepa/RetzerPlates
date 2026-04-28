@@ -236,7 +236,7 @@ RP:WrapHook("GetHealthColor", function(original, plate)
     if plate.isQuest then
         local db = RP.db.quest
         local unit = plate.unit
-        if unit and UnitCanAttack("player", unit) then
+        if unit and not RP.IsPassive(plate) then
             local reaction = UnitReaction("player", unit)
             if reaction and reaction == 4 then
                 return db.colorNeutral.r, db.colorNeutral.g, db.colorNeutral.b

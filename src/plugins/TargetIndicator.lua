@@ -133,6 +133,16 @@ RP:RegisterEvent("PLAYER_TARGET_CHANGED", function()
     RefreshTarget()
 end)
 
+-- Re-apply target visuals when the plate updates (e.g. passive↔attackable transition)
+---@param original function
+---@param plate RPPlate
+RP:WrapHook("UpdatePlate", function(original, plate)
+    original(plate)
+    if plate == currentTarget then
+        UpdateTargetPlate(plate, true)
+    end
+end)
+
 ---@param original function
 ---@param plate RPPlate
 RP:WrapHook("OnPlateRemoved", function(original, plate)

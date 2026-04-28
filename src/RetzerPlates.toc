@@ -2,7 +2,7 @@
 ## Notes: Nameplate addon
 ## Author: Retzer
 ## Version: @project-version@
-## Interface: 120000, 120001
+## Interface: 120001, 120005, 120000
 ## SavedVariables: RetzerPlatesDB
 ## IconTexture: Interface\AddOns\RetzerPlates\media\icon256.tga
 ## X-Curse-Project-ID: 1491659

@@ -189,4 +189,27 @@ function NP:Initialize()
             InitPlate(frame, unit)
         end
     end
+
+    -- Passive↔attackable transitions can occur without UNIT_FACTION/UNIT_FLAGS
+    -- firing (charm/MC, threat-based attackability, late faction sync). Poll
+    -- visible plates and react when IsPassive flips.
+    ---@class RPPlate
+    ---@field _wasPassive boolean?
+    local poller = CreateFrame("Frame")
+    local elapsed = 0
+    poller:SetScript("OnUpdate", function(_, dt)
+        elapsed = elapsed + dt
+        if elapsed < 0.2 then return end
+        elapsed = 0
+        for _, plate in pairs(NP.plates) do
+            if plate.unit then
+                local passive = RP.IsPassive(plate)
+                if plate._wasPassive ~= passive then
+                    plate._wasPassive = passive
+                    plate.frameType = RP:Call("GetFrameType", plate.unit)
+                    RP:Call("UpdatePlate", plate)
+                end
+            end
+        end
+    end)
 end
