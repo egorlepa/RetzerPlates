@@ -113,6 +113,9 @@ RP:WrapHook("UpdateLayout", function(original, plate)
     original(plate)
     local isMinorEnemy = plate.isMinor and not RP.IsPassive(plate) and RP.db.simplified.enabled
     if RP.IsPassive(plate) then
+        -- Reset to base size so a stale scaled state (e.g. previous target scale)
+        -- doesn't leak into anchors that reference plate.Health.
+        plate.Health:SetSize(RP.db.healthbar.width, RP.db.healthbar.height)
         plate.Health.bg:Hide()
         plate.Health.border:Hide()
     elseif isMinorEnemy then
